@@ -1,40 +1,47 @@
+import asyncio
+
+from pero.logger import get_log
+from pero.parse import parse
+from pero.type import EventType, MessageType
+
+_log = get_log()
+
+
 class MessageRouter:
     def __init__(self):
         self.handlers = {}
 
-    def register(self, event_type, message_type, source_type=None, identifer=None):
-        """装饰器：将函数注册到路由表，type=None时表示不需要验证"""
+    def register(
+        self,
+        event_type: EventType,
+        message_type: MessageType,
+    ):
+        """装饰器: 将函数注册到路由表, type=None时表示不需要验证"""
 
         def decorator(func):
             key = (
                 event_type,
                 message_type,
-                source_type
-                if source_type is not None
-                else "ALL_SOURCE",  # Default value if None
-                identifer
-                if identifer is not None
-                else "ALL_USERS",  # Default value if None
             )
             self.handlers[key] = func
-            print(f"Registered handler for {key}")
+            _log.info(f"Register handler for {key}")
             return func
 
         return decorator
 
-    def handle_message(
-        self, event_type, message_type, source_type=None, identifer=None
-    ):
-        """根据路由表处理消息，identifer=None时表示不验证用户"""
-        source_type = source_type if source_type is not None else "ALL_SOURCE"
-        identifer = identifer if identifer is not None else "ALL_USERS"
+    def handle_message(self, message):
+        (
+            event_type,
+            message_type,
+        ) = parse(message)
 
-        key = (event_type, message_type, source_type, identifer)
-        handler = self.handlers.get(key)
-        if handler:
-            return self.handlers[key]()
-        else:
-            print("No handler found for this message.")
+        for (
+            reg_event_type,
+            reg_message_type,
+        ), handler in self.handlers.items():
+            if (reg_event_type == event_type) and (reg_message_type == message_type):
+                asyncio.create_task(handler(message))
+                return
 
 
 # 全局路由实例

@@ -1,18 +1,19 @@
 from enum import Enum
 
 
-class Identifier(Enum):
-    IDENTIFIER_USER = "USER"
-    IDENTIFIER_OWNER = "OWNER"
+class LifeCycle(Enum):
+    ENABLE = "ENABLE"
+    DISABLE = "DISABLE"
+    CONNECT = "CONNECT"
 
 
-class SourceType(Enum):
-    SOURCE_PRIVATE = "PRIVATE"
-    SOURCE_GROUP = "GROUP"
+class Meta(Enum):
+    LIFECYCLE = LifeCycle
+    HEARTBEAT = "HEARTBEAT"
 
 
 class EventType(Enum):
-    EVENT_META = "META"
+    EVENT_META = Meta
     EVENT_MESSAGE = "MESSAGE"
     EVENT_MESSAGE_SENT = "MESSAGE_SENT"
     EVENT_REQUEST = "REQUEST"
