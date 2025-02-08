@@ -1,7 +1,7 @@
 import asyncio
 
 from pero.logger import get_log
-from pero.parse import parse
+from pero.parser import parse
 from pero.type import EventType, MessageType
 
 _log = get_log()
