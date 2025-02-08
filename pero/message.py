@@ -5,6 +5,11 @@ class BaseMessage:
         self.self_id = message.get("self_id", None)
         self.time = message.get("time", None)
         self.post_type = message.get("post_type", None)
+        self.target_id = (
+            message.get("target_id")
+            if message.get("target_id")
+            else message.get("group_id")
+        )
 
     def __repr__(self):
         return str({items: str(getattr(self, items)) for items in self.__slots__})

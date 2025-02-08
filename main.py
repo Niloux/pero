@@ -26,7 +26,7 @@ async def main():
                     # 接收消息
                     msg = await client.receive()
                     # 解析消息类型, 处理消息
-                    router.handle_message(msg)
+                    router.handle(msg)
 
                 except Exception as e:
                     _log.error(f"Error during message handling: {e}")

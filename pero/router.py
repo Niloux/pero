@@ -14,9 +14,9 @@ class MessageRouter:
     def register(
         self,
         event_type: EventType,
-        message_type: MessageType,
+        message_type: MessageType = None,
     ):
-        """装饰器: 将函数注册到路由表, type=None时表示不需要验证"""
+        """装饰器: 将函数注册到路由表, MessageType为None时表示不需要验证消息类型"""
 
         def decorator(func):
             key = (
@@ -29,7 +29,8 @@ class MessageRouter:
 
         return decorator
 
-    def handle_message(self, message):
+    # 异步处理消息, 区分事件和消息
+    def handle(self, message):
         (
             event_type,
             message_type,
