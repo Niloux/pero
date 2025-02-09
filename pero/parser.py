@@ -1,51 +1,43 @@
-from pero.logger import get_log
-from pero.type import EventType, Message, MessageType
-
-_log = get_log()
+from typing import Dict
 
 
-def parse_event_msg(message):
-    sub_type = message.get("sub_type")
-    if sub_type == "friend":
-        return Message.FRIEND
-    elif sub_type == "group":
-        return Message.GROUP
-    elif sub_type == "group_self":
-        return Message.GROUP_SELF
-    elif sub_type == "other":
-        return Message.OTHER
-    elif sub_type == "normal":
-        return Message.NORMAL
-    elif sub_type == "notice":
-        return Message.NOTICE
-    elif sub_type == "anonymous":
-        return Message.ANONYMOUS
-    else:
-        _log.warning(f"Unknown sub_type: {sub_type}")
-        raise Exception(f"Unknown sub_type: {sub_type}")
+class MessageParser:
+    @staticmethod
+    async def parse_message(event: Dict) -> Dict:
+        """
+        解析消息事件，根据消息的类型、来源、发送者等信息，转化为统一结构。
+        """
+        # 基本字段解析
+        source_type = event.get("message_type")  # "private" 或 "group"
+        sender_type = event.get("sub_type")  # "friend" 或 "other"
+
+        # 提取消息类型列表
+        message_types = []
+        for msg in event.get("message", []):
+            msg_type = msg.get("type")
+            if msg_type:
+                message_types.append(msg_type)
+
+        # 提取消息内容
+        content = event.get("message", [])
+
+        # 构建最终统一结构
+        return {
+            "event": "message",
+            "source_type": source_type,
+            "sender_type": sender_type,
+            "message_types": message_types,
+            "content": content,
+        }
 
 
-def parse_event(message: dict) -> EventType:
-    event = message.get("post_type")
-    if event in ["message", "message_sent"]:
-        event = parse_event_msg(message)
-    elif event == "meta_event":
-        pass
-    elif event == "request":
-        pass
-    elif event == "notice":
-        pass
-    else:
-        _log.warning(f"Unknown event: {event}")
-        raise Exception(f"Unknown event: {event}")
+# 示例解析
+if __name__ == "__main__":
+    # 示例消息体
+    from text import a, b, c
 
-    return event
+    events = [a, b, c]
 
-
-def parse(message: str) -> tuple[EventType, MessageType]:
-    # message = json.loads(message)
-    # event = parse_event(message)
-    return (
-        EventType.MESSAGE.FRIEND,
-        MessageType.TEXT,
-    )
+    for event in events:
+        parsed_event = MessageParser.parse_message(event)
+        print(parsed_event)

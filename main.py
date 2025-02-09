@@ -1,10 +1,12 @@
 import asyncio
+import json
 import traceback
 
 from pero.config import Config
 from pero.logger import get_log
+from pero.parser import MessageParser
 from pero.plugin_loader import load_plugins
-from pero.router import router
+from pero.router import EventDispatcher
 from pero.websocket import WebSocketClient
 
 _log = get_log()
@@ -25,8 +27,11 @@ async def main():
                 try:
                     # 接收消息
                     msg = await client.receive()
-                    # 解析消息类型, 处理消息
-                    router.handle(msg)
+                    # 解析事件
+                    msg = json.loads(msg)
+                    event = await MessageParser.parse_message(msg)
+                    # 处理事件
+                    await EventDispatcher.dispatch(event)
 
                 except Exception as e:
                     _log.error(f"Error during message handling: {e}")
