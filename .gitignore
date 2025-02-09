@@ -181,3 +181,6 @@ test
 .Spotlight-V100
 System Volume Information/IndexerVolumeGuid
 .vscode/
+
+#config文件
+config.yaml

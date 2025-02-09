@@ -1,4 +1,0 @@
-ws_uri: ws://127.0.0.1:3001
-hp_uri: http://127.0.0.1:3000 # 暂不支持http连接
-bot_uid: 183734182 # 机器人 qq 号
-token: your token # 没有就不填
