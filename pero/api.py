@@ -16,14 +16,26 @@ from pero.element import (
     Text,
     Video,
 )
+from pero.logger import get_log
 from pero.status import Status
+from pero.utils.literals import REQUEST_SUCCESS
 from pero.websocket import WebSocketClient
+
+_log = get_log()
+
+
+def check_and_log(result):
+    if result["status"] == REQUEST_SUCCESS:
+        _log.debug(result)
+    else:
+        _log.error(result)
+    return result
 
 
 class BotAPI:
-    def __init__(self, ws_client: WebSocketClient):
+    def __init__(self, ws_clinet: WebSocketClient):
         self.__message = []
-        self._http = ws_client
+        self._http = ws_clinet
 
     async def _construct_forward_message(self, messages):
         def decode_summary(report):
@@ -1168,8 +1180,8 @@ class BotAPI:
         if json:
             message.append(Json(json))
         if markdown:
+            # message.append(convert_uploadable_object(await md_maker(markdown), "image"))
             pass
-            # TODO
         if at:
             message.append(At(at))
         if reply:
@@ -1186,20 +1198,33 @@ class BotAPI:
         if image:
             message.append(Image(image))
         if rtf:
+            # 首先检查是否有 reply，只取第一个
+            reply_elem = None
+            for elem in rtf.elements:
+                if elem["type"] == "reply":
+                    reply_elem = Reply(elem["data"]["id"])
+                    break
+
+            # 如果有 reply，插入到消息开头
+            if reply_elem:
+                message.insert(0, reply_elem)
+
             # 检查是否包含基本元素(at/图片/文本/表情)
-            basic_types = {"at", "image", "text", "face"}  # 定义基本元素类型
+            basic_types = {"at", "image", "text", "face", "dice", "rps"}
             basic_elems = [elem for elem in rtf.elements if elem["type"] in basic_types]
 
             if basic_elems:  # 如果存在基本元素
                 # 只添加基本元素
                 message.extend(basic_elems)
             else:
-                # 如果没有基本元素，才使用所有元素
-                message.extend(rtf.elements)
+                # 如果没有基本元素，才使用所有非reply元素
+                message.extend(
+                    [elem for elem in rtf.elements if elem["type"] != "reply"]
+                )
         if not message:
             return {"code": 0, "msg": "消息不能为空"}
         params = {"group_id": group_id, "message": message}
-        return await self._http.post("/send_group_msg", json=params)
+        return check_and_log(await self._http.post("/send_group_msg", json=params))
 
     async def post_private_msg(
         self,
@@ -1237,8 +1262,8 @@ class BotAPI:
         if json:
             message.append(Json(json))
         if markdown:
+            # message.append(convert_uploadable_object(await md_maker(markdown), "image"))
             pass
-            # TODO
         if reply:
             message.insert(0, Reply(reply))
         if music:
@@ -1266,7 +1291,7 @@ class BotAPI:
         if not message:
             return {"code": 0, "msg": "消息不能为空"}
         params = {"user_id": user_id, "message": message}
-        return await self._http.post("/send_private_msg", json=params)
+        return check_and_log(await self._http.post("/send_private_msg", json=params))
 
     async def post_group_file(
         self,
@@ -1297,13 +1322,24 @@ class BotAPI:
         elif file:
             message.append(File(file))
         elif markdown:
+            # message.append(
+            #     convert_uploadable_object(
+            #         await md_maker(
+            #             read_file(
+            #                 markdown
+            #                 if os.path.isabs(markdown)
+            #                 else os.path.join(os.getcwd(), markdown)
+            #             )
+            #         ),
+            #         "image",
+            #     )
+            # )
             pass
-            # TODO
         else:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"group_id": group_id, "message": message}
-        return await self._http.post("/send_group_msg", json=params)
+        return check_and_log(await self._http.post("/send_group_msg", json=params))
 
     async def post_private_file(
         self,
@@ -1334,81 +1370,21 @@ class BotAPI:
         elif file:
             message.append(File(file))
         elif markdown:
+            # message.append(
+            #     convert_uploadable_object(
+            #         await md_maker(
+            #             read_file(
+            #                 markdown
+            #                 if os.path.isabs(markdown)
+            #                 else os.path.join(os.getcwd(), markdown)
+            #             )
+            #         ),
+            #         "image",
+            #     )
+            # )
             pass
-            # TODO
         else:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"user_id": user_id, "message": message}
-        return await self._http.post("/send_private_msg", json=params)
-
-    async def send_message(
-        self,
-        target_type: str,
-        target_id: Union[int, str],
-        message: Union[MessageChain, str],
-        reply: str = None,
-    ):
-        """
-        统一的消息发送接口
-
-        :param target_type: 'group' 或 'private'
-        :param target_id: 群号或QQ号
-        :param message: 消息内容,支持字符串或MessageChain
-        :param reply: 回复消息ID
-        :return: 发送消息的结果
-        """
-        if isinstance(message, str):
-            message = MessageChain(message)
-        elif not isinstance(message, MessageChain):
-            raise TypeError("消息必须是字符串或MessageChain类型")
-
-        msg_elements = message.elements
-        if reply:
-            msg_elements.insert(0, Reply(reply))
-
-        params = {"message": msg_elements}
-
-        if target_type == "group":
-            params["group_id"] = target_id
-            return await self._http.post("/send_group_msg", params)
-        elif target_type == "private":
-            params["user_id"] = target_id
-            return await self._http.post("/send_private_msg", params)
-        else:
-            raise ValueError("target_type 必须是 'group' 或 'private'")
-
-    # 以下是一些便捷方法
-    async def send_group_msg(
-        self,
-        group_id: Union[int, str],
-        message: Union[MessageChain, str],
-        reply: str = None,
-    ):
-        """发送群消息的便捷方法"""
-        return await self.send_message("group", group_id, message, reply)
-
-    async def send_private_msg(
-        self,
-        user_id: Union[int, str],
-        message: Union[MessageChain, str],
-        reply: str = None,
-    ):
-        """发送私聊消息的便捷方法"""
-        return await self.send_message("private", user_id, message, reply)
-
-    def add_text(self, text):
-        self.__message.append(Text(text))
-        return self
-
-    def add_face(self, face_id):
-        self.__message.append(Face(face_id))
-        return self
-
-    def add_image(self, file):
-        self.__message.append(Image(file))
-        return self
-
-    def add_at(self, user_id):
-        self.__message.append(At(user_id))
-        return self
+        return check_and_log(await self._http.post("/send_private_msg", json=params))

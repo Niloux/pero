@@ -1,7 +1,8 @@
-import websockets
-import json
 import datetime
+import json as Json
 from typing import Dict
+
+import websockets
 
 from pero.logger import get_log
 
@@ -51,7 +52,7 @@ class WebSocketClient:
             _log.error("WebSocket not connected.")
             return
         try:
-            await self.websocket.send(json.dumps(msg))
+            await self.websocket.send(Json.dumps(msg))
             _log.info(f"Sent: {msg}")
         except Exception as e:
             _log.error(f"Error sending message: {e}")
@@ -76,13 +77,13 @@ class WebSocketClient:
             self.is_connected = False
             _log.info("WebSocket connection closed.")
 
-    async def post(self, action, params=None, json_data=None):
+    async def post(self, action, params=None, json=None):
         """发送 POST 请求
 
         Args:
             action (str): 请求的动作类型。
             params (dict, optional): 请求的参数。默认为 None。
-            json_data (dict, optional): 请求的 JSON 数据。默认为 None。
+            json (dict, optional): 请求的 JSON 数据。默认为 None。
 
         Returns:
             None
@@ -94,13 +95,18 @@ class WebSocketClient:
         try:
             payload = {
                 "action": action.replace("/", ""),
-                "params": params if params is not None else json_data,
+                "params": params if params is not None else json,
                 "echo": int(datetime.datetime.now().timestamp()),
             }
 
-            await self.websocket.send(json.dumps(payload))
             _log.debug(f"Sent: {action=}, {payload=}")
-        except json.JSONEncodeError as e:
+            await self.websocket.send(Json.dumps(payload))
+            response = Json.loads(await self.websocket.recv())
+            _log.debug(f"Recv: {response=}")
+            return response
+        except Json.JSONEncodeError as e:
             _log.error(f"JSON encoding error: {e}")
+            raise e
         except Exception as e:
             _log.error(f"Error sending message: {e}")
+            raise e

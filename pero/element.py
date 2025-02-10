@@ -1,57 +1,41 @@
 import json
-import os
-import mimetypes
-import base64
 from typing import Union
 
-
-def trans_file(file_path):
-    if not os.path.isfile(file_path):
-        raise ValueError(f"The file {file_path} does not exist.")
-
-    # 获取文件的 MIME 类型
-    mime_type, _ = mimetypes.guess_type(file_path)
-
-    if mime_type is None:
-        raise ValueError("Unable to guess MIME type for the file.")
-
-    with open(file_path, "rb") as file:
-        file_data = file.read()
-        encoded_data = base64.b64encode(file_data).decode("utf-8")
-
-        return f"data:{mime_type};base64,{encoded_data}"
-
-
-def convert(file_path: str, message_type: str) -> dict:
-    """
-    本地文件转换为base64编码的二进制内容,网络文件直接返回URL
-    """
-    if file_path.startswith("http") or file_path.startswith("base64://"):
-        return {"type": message_type, "data": {"file": file_path}}
-    elif os.path.exists(file_path):
-        return {"type": message_type, "data": {"file": trans_file(file_path)}}
-    raise ValueError("Invalid file path or URL.")
+from pero.utils.io import convert_uploadable_object
 
 
 class MessageChain:
+    """消息链"""
+
     def __init__(self, chain=None):
         self.chain = []
         if chain is None:
             return
 
         if isinstance(chain, str):
-            try:
-                # 尝试解析JSON字符串，保持列表顺序
-                parsed_chain = json.loads(chain)
-                if isinstance(parsed_chain, list):
-                    self.chain = parsed_chain
-                else:
-                    self.chain = [Text(chain)]
-            except json.JSONDecodeError:
-                self.chain = [Text(chain)]
+            self.chain = [Text(chain)]
         elif isinstance(chain, list):
-            # 直接使用传入的列表，保持原有顺序
-            self.chain = list(chain)  # 创建新列表以避免引用问题
+            # 处理列表输入
+            for item in chain:
+                if isinstance(item, dict):
+                    self.chain.append(item)
+                elif isinstance(item, Element):
+                    self.chain.append(item)
+                elif isinstance(item, list):
+                    # 处理嵌套列表
+                    for sub_item in item:
+                        if isinstance(sub_item, dict):
+                            self.chain.append(sub_item)
+                        elif isinstance(sub_item, Element):
+                            self.chain.append(sub_item)
+                        else:
+                            self.chain.append(Text(str(sub_item)))
+                else:
+                    self.chain.append(Text(str(item)))
+        elif isinstance(chain, Element):
+            self.chain = [chain]
+        else:
+            self.chain = [Text(str(chain))]
 
     def __str__(self):
         """确保字符串表示时保持顺序"""
@@ -67,6 +51,13 @@ class MessageChain:
         if isinstance(other, MessageChain):
             return MessageChain(self.chain + other.chain)
         return MessageChain(self.chain + [other])
+
+    def __iadd__(self, other):
+        if isinstance(other, MessageChain):
+            self.chain += other.chain
+        else:
+            self.chain += MessageChain([other]).chain
+        return self
 
     def display(self) -> str:
         """获取消息链的字符串表示"""
@@ -97,32 +88,12 @@ class Element:
     """消息元素基类"""
 
     type: str = "element"
-    type_map = {}
 
     def __new__(cls, *args, **kwargs):
         """直接返回字典而不是类实例"""
         instance = super().__new__(cls)
         instance.__init__(*args, **kwargs)
         return instance.to_dict()
-
-    @classmethod
-    def from_type(cls, type_value, *args, **kwargs):
-        """根据type动态创建子类实例"""
-        subclass = cls.type_map.get(type_value)
-        if subclass:
-            return subclass(*args, **kwargs)
-        else:
-            raise ValueError(f"Unknown type: {type_value}")
-
-    @classmethod
-    def register_subclass(cls, subclass):
-        """注册子类"""
-        cls.type_map[subclass.type] = subclass
-
-    def to_dict(self) -> dict:
-        """通用的转换方法，可以被子类继承并覆盖"""
-        data = {key: getattr(self, key) for key in vars(self)}
-        return {"type": self.type, "data": data}
 
 
 class Text(Element):
@@ -133,53 +104,56 @@ class Text(Element):
     def __init__(self, text: str):
         self.text = text
 
+    def to_dict(self) -> dict:
+        if self.text:
+            return {"type": "text", "data": {"text": self.text}}
+        else:
+            return {"type": "text", "data": {"text": ""}}
+
 
 class At(Element):
+    """@消息元素"""
+
     type = "at"
 
     def __init__(self, qq: Union[int, str]):
         self.qq = qq
 
+    def to_dict(self) -> dict:
+        return {"type": "at", "data": {"qq": self.qq}}
+
 
 class AtAll(Element):
+    """@全体消息元素"""
+
     type = "at"
 
-    def to_dict(self):
+    def as_dict(self):
         return {"type": "at", "data": {"qq": "all"}}
 
 
 class Image(Element):
+    """图片消息元素"""
+
     type = "image"
 
     def __init__(self, path: str):
         self.path = path
 
     def to_dict(self) -> dict:
-        return convert(self.path, "image")
+        return convert_uploadable_object(self.path, "image")
 
 
 class Face(Element):
+    """表情消息元素"""
+
     type = "face"
 
     def __init__(self, face_id: int):
         self.id = face_id
 
-
-# TODO: 戳一戳
-# class PokeMethods(str, Enum):
-#     ChuoYiChuo = "ChuoYiChuo"
-#     BiXin = "BiXin"
-#     DianDian = "DianDian"
-
-
-# class Poke(Element):
-#     type = "poke"
-
-#     def __init__(self, method: Union[PokeMethods, str]):
-#         self.method = method
-
-#     def to_dict(self) -> dict:
-#         return {"type": "poke", "data": {"type": self.method}}
+    def to_dict(self) -> dict:
+        return {"type": "face", "data": {"id": self.id}}
 
 
 class Reply(Element):
@@ -289,8 +263,10 @@ class CustomMusic(Element):
         }
 
 
-# TODO: Markdown 图片
+# TODO
 # class Markdown(Element):
+#     """Markdown消息元素"""
+
 #     type = "image"
 
 #     def __init__(self, markdown: str):
@@ -301,10 +277,12 @@ class CustomMusic(Element):
 
 
 class File(Element):
+    """文件消息元素"""
+
     type = "file"
 
     def __init__(self, file: str):
         self.file = file
 
     def to_dict(self) -> dict:
-        return convert(self.file, "file")
+        return convert_uploadable_object(self.file, "file")
