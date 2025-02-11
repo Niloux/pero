@@ -108,6 +108,8 @@ class MessageAdapter:
 #     await asyncio.sleep(1)  # 模拟异步操作（比如数据库查询）
 #     print(f"处理器 1 处理消息: {event}")
 
+# TODO: 需要将事件管理和消息管理统一在一个管理器下面
+
 
 @EventDispatcher.register_event("meta_event")
 async def handle_meta_event(event, api):
