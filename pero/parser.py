@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 
 from pero.logger import get_log
@@ -7,7 +8,8 @@ _log = get_log()
 
 class EventParser:
     @staticmethod
-    async def parse_event(msg: Dict):
+    async def parse_event(msg: str) -> Dict:
+        msg = json.loads(msg)
         event_type = msg.get("post_type")
         if event_type == "message" or event_type == "message_sent":
             return EventParser._parse_message(msg)

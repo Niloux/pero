@@ -1,5 +1,4 @@
 import asyncio
-import json
 import traceback
 
 from pero.api import BotAPI
@@ -22,13 +21,12 @@ async def main():
             # 创建BotAPI实例
             api = BotAPI(client)
             # 加载所有插件
-            load_plugins()
+            await load_plugins()
             while client.is_connected:
                 try:
                     # 接收消息
                     msg = await client.receive()
                     # 解析事件
-                    msg = json.loads(msg)
                     event = await EventParser.parse_event(msg)
                     # 处理事件
                     await EventDispatcher.dispatch(event, api)

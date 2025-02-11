@@ -2,6 +2,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Tuple
 
 from pero.api import BotAPI
+from pero.cmd.reload_plugins import reload_plugins
 from pero.logger import get_log
 
 _log = get_log()
@@ -123,13 +124,9 @@ async def handle_message_event(event: dict, api):
 # ========== 注册不同的 message 类型处理器 ==========
 
 
-# @MessageAdapter.register_message("text")
-# async def handle_text_message(event: dict):
-#     """处理文本消息"""
-#     _log.info(
-#         f"[文本消息] 来源: {event.get('source_type')}, 发送者: {event.get('sender_type')}, 内容: {event.get('content')}"
-#     )
-#     return {"response": f"收到文本: {event.get('content')}"}
+@MessageAdapter.register_message("text")
+async def handle_cmd(event: dict, api: BotAPI):
+    await reload_plugins(event, api)
 
 
 # @MessageAdapter.register_message("image")
