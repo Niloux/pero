@@ -3,12 +3,11 @@ from typing import Dict
 from openai import OpenAI
 
 from pero.api import BotAPI
-from pero.config import Config
+from pero.config import CONFIG
 from pero.logger import get_log
 from pero.router import MessageAdapter
 
-config = Config("config.yaml")
-api_key = config.kimi_api
+api_key = CONFIG.kimi_api
 
 client = OpenAI(
     api_key=api_key,
@@ -33,7 +32,7 @@ async def kimi_text(event: Dict, api: BotAPI):
         messages=[
             {
                 "role": "system",
-                "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
+                "content": "你是 Pero，由 Texasx3d 提供的人工智能助手，你更擅长中文和英文的对话。你是群友的好帮手！你很可爱！非常非常可爱！",
             },
             {"role": "user", "content": text},
         ],

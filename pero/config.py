@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import yaml
 
 
@@ -30,3 +32,8 @@ class Config:
 
     def __repr__(self):
         return f"Config({self._config_data})"
+
+
+current_dir = Path(__file__).parent
+config_dir = current_dir.parent
+CONFIG = Config(f"{config_dir}/config.yaml")

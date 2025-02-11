@@ -1,11 +1,9 @@
 from openai import OpenAI
 
-from pero.config import Config
+from pero.config import CONFIG
 
-config = Config("config.yaml")
-
-DS_API = config.deepseek_api
-KM_API = config.kimi_api
+DS_API = CONFIG.deepseek_api
+KM_API = CONFIG.kimi_api
 deepseek_url = "https://api.deepseek.com"
 kimi_url = "https://api.moonshot.cn/v1"
 

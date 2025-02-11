@@ -110,7 +110,7 @@ class MessageAdapter:
 
 @EventDispatcher.register_event("meta_event")
 async def handle_meta_event(event, api):
-    await asyncio.sleep(0.5)  # 模拟异步操作（比如 HTTP 请求）
+    await asyncio.sleep(0.5)
     _log.info(f"处理meta消息: {event}")
 
 

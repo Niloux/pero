@@ -3,7 +3,7 @@ import json
 import traceback
 
 from pero.api import BotAPI
-from pero.config import Config
+from pero.config import CONFIG
 from pero.logger import get_log
 from pero.parser import EventParser
 from pero.plugin_loader import load_plugins
@@ -11,7 +11,6 @@ from pero.router import EventDispatcher
 from pero.websocket import WebSocketClient
 
 _log = get_log()
-CONFIG = Config("config.yaml")
 
 
 async def main():
@@ -36,7 +35,6 @@ async def main():
 
                 except Exception as e:
                     _log.error(f"Error during message handling: {e}")
-                    _log.error("Detailed traceback:")
                     _log.error(traceback.format_exc())
     except Exception as e:
         _log.error(f"Error during WebSocket connection: {e}")
