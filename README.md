@@ -13,7 +13,7 @@ Pero 是一款基于 WebSocket 通信和 napcat 对接的 QQ 机器人，通过�
 ## 依赖
 
 - Python 3.7+
-- **NapCap**<https://github.com/NapNeko/NapCatQQ>
+- [NapCat]
 
 ## 安装
 
@@ -42,3 +42,6 @@ python main.py
 ### 4.消息发送与响应
 
 ### 5.定时任务
+
+
+[napcat]: https://github.com/NapNeko/NapCatQQ
