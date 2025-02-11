@@ -2,7 +2,6 @@ import asyncio
 from typing import Any, Callable, Dict, List, Tuple
 
 from pero.api import BotAPI
-from pero.cmd.reload_plugins import reload_plugins
 from pero.logger import get_log
 
 _log = get_log()
@@ -128,7 +127,9 @@ async def handle_message_event(event: dict, api):
 
 @MessageAdapter.register_message("text")
 async def handle_cmd(event: dict, api: BotAPI):
-    await reload_plugins(event, api)
+    from pero.cmd.command_manager import command_manager
+
+    await command_manager.execute(event=event, api=api)
 
 
 # @MessageAdapter.register_message("image")
