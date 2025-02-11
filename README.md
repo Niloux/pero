@@ -13,15 +13,32 @@ Pero 是一款基于 WebSocket 通信和 napcat 对接的 QQ 机器人，通过�
 ## 依赖
 
 - Python 3.7+
-- **WebSocket-client**: 用于 WebSocket 通信。
-- **Requests**: 用于 HTTP 请求。
-- **apscheduler**: 用于定时任务调度。
-- **pluginbase**: 用于插件管理。
-- **以上由chatgpt自动生成......**
+- **NapCap**<https://github.com/NapNeko/NapCatQQ>
 
 ## 安装
 
-首先，安装依赖项喵~
+首先，安装依赖项~
 
 ```bash
 pip install -r requirements.txt
+```
+
+然后，配置 **config.yaml** 文件，填入相关配置。
+
+## 使用方法
+
+### 1.启动机器人
+
+```bash
+python main.py
+```
+
+这会启动一个 WebSocket 服务器，并连接到 NapCat 服务。
+
+### 2.注册消息处理器
+
+### 3.插件管理
+
+### 4.消息发送与响应
+
+### 5.定时任务
