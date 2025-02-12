@@ -28,8 +28,11 @@ async def main():
                     msg = await client.receive()
                     # 解析事件
                     event = await EventParser.parse_event(msg)
-                    # 处理事件
-                    await EventDispatcher.dispatch(event, api)
+                    if event:
+                        # 处理事件
+                        await EventDispatcher.dispatch(event, api)
+                    else:
+                        _log.warning(f"解析事件失败或事件为空: {msg}")
 
                 except Exception as e:
                     _log.error(f"Error during message handling: {e}")

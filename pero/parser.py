@@ -15,10 +15,22 @@ class EventParser:
             return EventParser._parse_message(msg)
         elif event_type == "meta_event":
             return EventParser._parse_meta(msg)
-        else:
-            # TODO
-            _log.error(f"未配置解析: {msg}")
-            return None
+        elif event_type == "request":
+            return EventParser._parse_request(msg)
+        elif event_type == "notice":
+            return EventParser._parse_notice(msg)
+
+        return None
+
+    @classmethod
+    def _parse_request(self, event: Dict) -> Dict:
+        """解析request事件"""
+        pass
+
+    @classmethod
+    def _parse_notice(self, event: Dict) -> Dict:
+        """解析notice事件"""
+        pass
 
     @classmethod
     def _parse_meta(self, event: Dict) -> Dict:
