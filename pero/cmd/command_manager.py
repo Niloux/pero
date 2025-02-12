@@ -3,7 +3,9 @@ from typing import Dict
 
 from pero.api import BotAPI
 from pero.cmd.commander import Command
-from pero.cmd.reload_plugins import ReloadCommand
+from pero.logger import get_log
+
+_log = get_log()
 
 
 class CommandParser:
@@ -33,6 +35,7 @@ class CommandManager:
     def register(self, command_name: str, command_class: Command):
         """注册命令到命令管理器"""
         self.commands[command_name] = command_class
+        _log.info(f"register cmd: {command_name}--{command_class}")
 
     async def execute(self, event: Dict, api: BotAPI) -> bool:
         """根据命令解析执行对应的命令"""
@@ -83,5 +86,12 @@ class CommandManager:
 # 创建 CommandManager 实例
 command_manager = CommandManager()
 
-# 注册命令
-command_manager.register("reload", ReloadCommand)
+
+def register_command(command_name: str):
+    """装饰器：自动注册命令"""
+
+    def decorator(command_class):
+        command_manager.register(command_name, command_class)
+        return command_class
+
+    return decorator

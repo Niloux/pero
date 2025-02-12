@@ -1,5 +1,6 @@
 import traceback
 
+from pero.cmd.command_manager import register_command
 from pero.cmd.commander import Command
 from pero.logger import get_log
 from pero.plugin_loader import PluginReloader
@@ -7,6 +8,7 @@ from pero.plugin_loader import PluginReloader
 _log = get_log()
 
 
+@register_command("reload")
 class ReloadCommand(Command):
     def __init__(self, command, text):
         super().__init__(command, text)
