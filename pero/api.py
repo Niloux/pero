@@ -1225,7 +1225,7 @@ class BotAPI:
             return {"code": 0, "msg": "消息不能为空"}
         params = {"group_id": group_id, "message": message}
         # TODO这个check屁用没有，放错位置了
-        return check_and_log(await self._http.post("/send_group_msg", json=params))
+        await self._http.post("/send_group_msg", json=params)
 
     async def post_private_msg(
         self,

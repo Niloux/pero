@@ -22,8 +22,6 @@ class BotClient:
         self._message_queue = asyncio.Queue()
         self._tasks = set()
 
-        self._recv_lock = asyncio.Lock()  # 添加接收锁
-
     async def _process_message(self, msg: str):
         """处理单个消息"""
         try:
@@ -54,9 +52,8 @@ class BotClient:
         """消息接收器，从 WebSocket 接收消息并放入队列"""
         while self.is_running and self.client.is_connected:
             try:
-                async with self._recv_lock:  # 确保在任何时刻只有一个协程调用 recv
-                    msg = await self.client.receive()
-                    await self._message_queue.put(msg)
+                msg = await self.client.receive()
+                await self._message_queue.put(msg)
             except Exception as e:
                 _log.error(f"Error receiving message: {e}")
                 _log.error(traceback.format_exc())
