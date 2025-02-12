@@ -12,28 +12,28 @@ class EventParser:
         msg = json.loads(msg)
         event_type = msg.get("post_type")
         if event_type == "message" or event_type == "message_sent":
-            return EventParser._parse_message(msg)
+            return await EventParser._parse_message(msg)
         elif event_type == "meta_event":
-            return EventParser._parse_meta(msg)
+            return await EventParser._parse_meta(msg)
         elif event_type == "request":
-            return EventParser._parse_request(msg)
+            return await EventParser._parse_request(msg)
         elif event_type == "notice":
-            return EventParser._parse_notice(msg)
+            return await EventParser._parse_notice(msg)
 
         return None
 
     @classmethod
-    def _parse_request(self, event: Dict) -> Dict:
+    async def _parse_request(self, event: Dict) -> Dict:
         """解析request事件"""
         pass
 
     @classmethod
-    def _parse_notice(self, event: Dict) -> Dict:
+    async def _parse_notice(self, event: Dict) -> Dict:
         """解析notice事件"""
         pass
 
     @classmethod
-    def _parse_meta(self, event: Dict) -> Dict:
+    async def _parse_meta(self, event: Dict) -> Dict:
         """解析meta事件"""
         return {
             "event": "meta_event",
@@ -43,7 +43,7 @@ class EventParser:
         }
 
     @classmethod
-    def _parse_message(self, event: Dict) -> Dict:
+    async def _parse_message(self, event: Dict) -> Dict:
         """
         解析消息事件，根据消息的类型、来源、发送者等信息，转化为统一结构。
         """

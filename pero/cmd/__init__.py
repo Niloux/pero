@@ -1,7 +1,9 @@
 # pero/cmd/__init__.py
-from pero.cmd.reload_plugins import ReloadCommand
+from pero.cmd.reload import Reload
+from pero.cmd.weather import Forecast
 
 __all__ = [
-    "ReloadCommand",
-    # 其他你希望公开的类
+    "Reload",
+    "Forecast",
+    # 希望公开的类
 ]

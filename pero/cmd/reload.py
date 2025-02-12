@@ -9,7 +9,7 @@ _log = get_log()
 
 
 @register_command("reload")
-class ReloadCommand(Command):
+class Reload(Command):
     def __init__(self, command, text):
         super().__init__(command, text)
 

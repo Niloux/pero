@@ -13,7 +13,7 @@ class CommandParser:
         # 定义一个正则表达式来匹配"/cmd"命令格式
         self.command_pattern = re.compile(r"^/([a-zA-Z0-9_]+)(?:\s+(.*))?$")
 
-    def parse(self, input_str: str):
+    async def parse(self, input_str: str):
         """
         解析输入的命令字符串，并返回命令和文本
         """
@@ -40,10 +40,10 @@ class CommandManager:
     async def execute(self, event: Dict, api: BotAPI) -> bool:
         """根据命令解析执行对应的命令"""
         # 从 event 中提取文本并解析命令
-        text = self._extract_text(event)
+        text = await self._extract_text(event)
         try:
             command_parser = CommandParser()
-            command_name, command_text = command_parser.parse(text)
+            command_name, command_text = await command_parser.parse(text)
 
             # 非命令文本，则不执行
             if not command_name:
@@ -68,7 +68,7 @@ class CommandManager:
             )
             return False
 
-    def _extract_text(self, event: Dict) -> str:
+    async def _extract_text(self, event: Dict) -> str:
         """从 event 中提取文本消息"""
         for content in event.get("content", []):
             if content.get("type") == "text":

@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json as Json
 from typing import Dict
@@ -14,6 +15,8 @@ class WebSocketClient:
         self.uri = uri
         self.websocket = None
         self.is_connected = False
+
+        self.lock = asyncio.Lock()
 
     async def __aenter__(self):
         """进入异步上下文管理器"""
@@ -52,8 +55,9 @@ class WebSocketClient:
             _log.error("WebSocket not connected.")
             return
         try:
-            await self.websocket.send(Json.dumps(msg))
-            _log.info(f"Sent: {msg}")
+            async with self.lock:  # 使用 async with 来自动管理锁
+                await self.websocket.send(Json.dumps(msg))
+                _log.info(f"Sent: {msg}")
         except Exception as e:
             _log.error(f"Error sending message: {e}")
 
@@ -63,9 +67,10 @@ class WebSocketClient:
             _log.error("WebSocket not connected.")
             return ""
         try:
-            response = await self.websocket.recv()
-            _log.debug(f"Received: {response}")
-            return response
+            async with self.lock:  # 确保每次只有一个协程调用 receive
+                response = await self.websocket.recv()
+                _log.debug(f"Received: {response}")
+                return response
         except Exception as e:
             _log.error(f"Error receiving message: {e}")
             return ""
@@ -100,11 +105,11 @@ class WebSocketClient:
             }
 
             _log.debug(f"Sent: {action=}, {payload=}")
-            await self.websocket.send(Json.dumps(payload))
+            await self.send(payload)
             response = Json.loads(await self.websocket.recv())
             _log.debug(f"Recv: {response=}")
             return response
-        except Json.JSONEncodeError as e:
+        except Json.JSONDecodeError as e:
             _log.error(f"JSON encoding error: {e}")
             raise e
         except Exception as e:
