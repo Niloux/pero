@@ -37,6 +37,6 @@ async def kimi_text(event: Dict):
 
     result = completion.choices[0].message.content
     logger.info(f"kimi回复消息{result}")
-    return await PERO_API.post_private_msg(
-        user_id=event.get("target"), text=result, reply=event.get("reply")
+    return await PERO_API.post_group_msg(
+        group_id=event.get("target"), text=result, reply=event.get("reply")
     )

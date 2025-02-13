@@ -1,3 +1,5 @@
+import importlib.util
+import os
 from typing import Dict
 
 from pero.api import PERO_API
@@ -12,6 +14,16 @@ class CommandManager:
     def register(self, command_name: str, command_class):
         """注册命令到命令管理器"""
         self.commands[command_name] = command_class
+
+    def load_commands(self, commands_directory: str):
+        """动态加载命令目录中的所有命令"""
+        for filename in os.listdir(commands_directory):
+            if filename.endswith(".py") and not filename.startswith("__"):
+                module_name = filename[:-3]
+                module_path = os.path.join(commands_directory, filename)
+                spec = importlib.util.spec_from_file_location(module_name, module_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
     async def execute(self, event: Dict) -> bool:
         """根据命令解析执行对应的命令"""

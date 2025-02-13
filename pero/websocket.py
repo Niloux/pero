@@ -48,7 +48,7 @@ class WebSocketClient:
             return
 
         response = await self.websocket.recv()
-        logger.info(f"Received Lifecycle Event: {response}")
+        logger.debug(f"Received Lifecycle Event: {response}")
 
         # 在这里可以处理连接建立后的其他生命周期事件
         # 如：验证连接是否成功、获取认证信息等

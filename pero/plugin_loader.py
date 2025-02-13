@@ -5,7 +5,7 @@ from pathlib import Path
 from pero.utils.logger import logger
 
 
-async def load_plugins(plugin_dir="plugins"):
+def load_plugins(plugin_dir="plugins"):
     """加载所有插件"""
     # 获取当前目录路径
     current_dir = Path(__file__).parent
@@ -14,7 +14,6 @@ async def load_plugins(plugin_dir="plugins"):
     # 确保插件目录在 sys.path 中
     if str(current_dir) not in sys.path:
         sys.path.append(str(current_dir))
-        logger.info(f"将当前目录添加到 sys.path: {current_dir}")
 
     # 加载插件
     loaded_plugins = []
