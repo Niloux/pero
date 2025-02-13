@@ -1,14 +1,14 @@
 import asyncio
 from typing import Any, Dict
 
+from pero.event_adapter import EventAdapter
 from pero.event_parser import EventParser
-from pero.message_adapter import MessageAdapter
 from pero.utils.logger import logger
 from pero.utils.queue import post_queue, recv_queue
 
 
 class TaskManager:
-    def __init__(self, dispatch: MessageAdapter):
+    def __init__(self, dispatch: EventAdapter):
         self.dispatch = dispatch
 
     async def start(self):

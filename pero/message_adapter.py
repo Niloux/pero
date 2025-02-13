@@ -1,86 +1,66 @@
 import asyncio
 from typing import Any, Callable, Dict, List
 
+from pero.cmd.command_manager import command_manager
 from pero.utils.logger import logger
 
 
 class MessageAdapter:
     handlers = {
-        "request": {},
-        "notice": {},
-        "message": {},
-        "meta_event": {},
-        "status": {},
+        "private": {},
+        "group": {},
     }
 
     @classmethod
-    def register_handler(cls, handler_type: str, event_type: str):
+    def register(cls, source_type: str, required_event_types: List[str]):
         def decorator(handler: Callable):
-            if event_type not in cls.handlers[handler_type]:
-                cls.handlers[handler_type][event_type] = []
-            cls.handlers[handler_type][event_type].append(handler)
-            logger.debug(f"Registered {handler_type} handler for type: {event_type}")
+            key = tuple(sorted(required_event_types))
+            if key not in cls.handlers[source_type]:
+                cls.handlers[source_type][key] = []
+            cls.handlers[source_type][key].append(handler)
+            logger.debug(
+                f"Registered {source_type} handler for event types: {required_event_types}"
+            )
             return handler
 
         return decorator
 
     @classmethod
     async def handle_event(cls, event: Dict[str, Any]) -> List[Dict[str, Any]]:
-        handler_type = event.get("event")
-        event_type = event.get(f"{handler_type}_type")
+        source_type = event.get("source_type")
+        event_types = event.get("message_type")
         results = []
 
-        if isinstance(event_type, list):
-            for type in event_type:
-                handlers = cls.handlers[handler_type].get(type, [])
-                results.extend(
-                    await asyncio.gather(*[handler(event) for handler in handlers])
-                )
+        if isinstance(event_types, list):
+            event_types = sorted(event_types)
         else:
-            handlers = cls.handlers[handler_type].get(event_type, [])
-            results.extend(
-                await asyncio.gather(*[handler(event) for handler in handlers])
-            )
+            event_types = [event_types]
+
+        key = tuple(event_types)
+        handlers = cls.handlers[source_type].get(key, [])
+
+        # 将cmd指令添加在这里
+        results.extend(
+            [
+                task_result
+                for task_result in await asyncio.gather(
+                    *[handler(event) for handler in handlers],
+                    command_manager.execute(event),
+                )
+                if task_result is not None
+            ]
+        )
 
         return results
 
-    @classmethod
-    async def handle_request(cls, event: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return await cls.handle_event("request", event)
 
-    @classmethod
-    async def handle_notice(cls, event: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return await cls.handle_event("notice", event)
-
-    @classmethod
-    async def handle_message(cls, event: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return await cls.handle_event("message", event)
-
-    @classmethod
-    async def handle_meta_event(cls, event: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return await cls.handle_event("meta_event", event)
-
-
-# 示例：注册处理message类型事件的方法
-@MessageAdapter.register_handler("message", "text")
-async def handle_friend_message(event: Dict[str, Any]) -> Dict[str, Any]:
+@MessageAdapter.register("group", ["text"])
+async def handle_group_text_and_at_message(event: Dict[str, Any]) -> Dict[str, Any]:
     from pero.api import PERO_API
 
-    if event.get("source_type") != "private":
-        return await PERO_API.post_group_msg(
-            group_id=event.get("target"),
-            text="私人测试功能喵～",
-            reply=event.get("reply"),
-        )
-    logger.info(f"测试收到消息: {event}")
-    return await PERO_API.post_private_msg(
-        user_id=event.get("target"),
-        text="你好，我是pero，很高兴见到你！",
+    logger.debug(f"Handling group message with text and at: {event}")
+    return await PERO_API.post_group_msg(
+        group_id=event.get("target"),
+        text="这是一个群消息。",
         reply=event.get("reply"),
     )
-
-
-# 示例：注册处理status类型事件的方法
-@MessageAdapter.register_handler("status", "ok")
-async def handle_friend_status(event: Dict[str, Any]) -> Dict[str, Any]:
-    logger.info(f"Handling status message: {event}")

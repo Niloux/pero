@@ -1,9 +1,10 @@
 import importlib.util
 import os
-from typing import Dict
+from typing import Any, Dict, Tuple
 
 from pero.api import PERO_API
 from pero.cmd.command_parser import CommandParser
+from pero.utils.logger import logger
 
 
 class CommandManager:
@@ -25,7 +26,7 @@ class CommandManager:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
 
-    async def execute(self, event: Dict) -> bool:
+    async def execute(self, event: Dict) -> Any:
         """根据命令解析执行对应的命令"""
         # 从 event 中提取文本并解析命令
         text = await self._extract_text(event)
@@ -34,7 +35,9 @@ class CommandManager:
 
         # 非命令文本，则不执行
         if not command_name:
-            return False
+            return None
+
+        logger.info(f"接收到命令: {command_name} {command_text}")
 
         # 如果命令注册表中存在该命令，则执行对应命令
         if command_name in self.commands:
@@ -43,11 +46,10 @@ class CommandManager:
             command_instance = command_class(command_name, command_text)
             response = await command_instance.execute()
             # 回显响应
-            await self._send_response(event, response)
+            return await self._send_response(event, response)
         else:
             # 如果命令不存在，则返回无效命令响应
-            await self._send_response(event, f"{command_name}命令无效喵！")
-            return False
+            return await self._send_response(event, f"{command_name}命令无效喵！")
 
     async def _extract_text(self, event: Dict) -> str:
         """从 event 中提取文本消息"""
@@ -56,7 +58,7 @@ class CommandManager:
                 return content.get("data", {}).get("text", "")
         return ""
 
-    async def _send_response(self, event: Dict, message: str):
+    async def _send_response(self, event: Dict, message: str) -> Tuple[str, Dict]:
         """根据event中的类型发送回复"""
         if event.get("source_type") == "private":
             return await PERO_API.post_private_msg(

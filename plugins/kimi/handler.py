@@ -15,7 +15,7 @@ client = OpenAI(
 )
 
 
-@MessageAdapter.register_handler("message", "at")
+@MessageAdapter.register("group", ["text", "at"])
 async def kimi_text(event: Dict):
     # 找出text消息
     logger.info(f"kimi收到消息: {event}")

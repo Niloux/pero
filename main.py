@@ -1,7 +1,7 @@
 import asyncio
 
 from pero.cmd.command_manager import command_manager
-from pero.message_adapter import MessageAdapter
+from pero.event_adapter import EventAdapter
 from pero.plugin_loader import load_plugins
 from pero.task_manager import TaskManager
 from pero.utils.config import config
@@ -17,7 +17,7 @@ async def main():
         command_manager.load_commands("pero/cmd")
 
         # 等待接收、发送任务和任务管理器的启动完成
-        dispatcher = MessageAdapter()
+        dispatcher = EventAdapter()
         task_manager = TaskManager(dispatcher)
         await asyncio.gather(
             client.receive_task, client.post_task, task_manager.start()

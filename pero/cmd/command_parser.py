@@ -17,4 +17,4 @@ class CommandParser:
             text = match.group(2) if match.group(2) else ""  # 提取文本部分（如果有）
             return command, text
         else:
-            return None, ""
+            return None, None
