@@ -14,10 +14,9 @@ async def main():
         # 加载插件
         await load_plugins()
 
+        # 等待接收、发送任务和任务管理器的启动完成
         dispatcher = MessageAdapter()
         task_manager = TaskManager(dispatcher)
-
-        # 等待接收、发送任务和任务管理器的启动完成
         await asyncio.gather(
             client.receive_task, client.post_task, task_manager.start()
         )

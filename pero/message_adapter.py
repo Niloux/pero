@@ -61,37 +61,12 @@ class MessageAdapter:
         return await cls.handle_event("meta_event", event)
 
 
-# # 示例：注册处理request类型事件的方法
-# @MessageAdapter.register_request_handler("friend")
-# async def handle_friend_request(event: Dict[str, Any]) -> Dict[str, Any]:
-#     logger.info(f"Handling friend request: {event}")
-#     return {
-#         "event": "request",
-#         "request_type": event.get("request_type"),
-#         "user_id": event.get("user_id"),
-#         "comment": event.get("comment"),
-#         "status": "handled by friend request handler"
-#     }
-
-# # 示例：注册处理notice类型事件的方法
-# @MessageAdapter.register_notice_handler("invite")
-# async def handle_invite_notice(event: Dict[str, Any]) -> Dict[str, Any]:
-#     logger.info(f"Handling invite notice: {event}")
-#     return {
-#         "event": "notice",
-#         "notice_type": event.get("notice_type"),
-#         "user_id": event.get("user_id"),
-#         "group_id": event.get("group_id"),
-#         "status": "handled by invite notice handler"
-#     }
-
-
 # 示例：注册处理message类型事件的方法
 @MessageAdapter.register_handler("message", "text")
 async def handle_friend_message(event: Dict[str, Any]) -> Dict[str, Any]:
     from pero.api import PERO_API
 
-    if event.get("sender_type") != "private":
+    if event.get("source_type") != "private":
         return await PERO_API.post_group_msg(
             group_id=event.get("target"),
             text="私人测试功能喵～",
@@ -109,15 +84,3 @@ async def handle_friend_message(event: Dict[str, Any]) -> Dict[str, Any]:
 @MessageAdapter.register_handler("status", "ok")
 async def handle_friend_status(event: Dict[str, Any]) -> Dict[str, Any]:
     logger.info(f"Handling status message: {event}")
-
-
-# @MessageAdapter.register_message_handler("group")
-# async def handle_group_message(event: Dict[str, Any]) -> Dict[str, Any]:
-#     logger.info(f"Handling group message: {event}")
-#     return {
-#         "event": "message",
-#         "message_type": event.get("message_type"),
-#         "content": event.get("message", []),
-#         "sender_id": event.get("user_id"),
-#         "status": "handled by group message handler"
-#     }

@@ -4,8 +4,7 @@ from urllib.parse import quote
 
 import aiohttp
 
-from pero.cmd.command_manager import register_command
-from pero.cmd.commander import Command
+from pero.cmd.commands import BaseCommand
 from pero.utils.config import config
 from pero.utils.logger import logger
 
@@ -78,15 +77,11 @@ class WeatherService:
         )
 
 
-@register_command("weather")
-class Forecast(Command):
-    def __init__(self, command, text):
-        super().__init__(command, text)
+class Forecast(BaseCommand):
+    command_name = "weather"
 
     async def execute(self) -> str:
         """处理天气查询命令"""
-        if self.command != "weather":
-            return "无效的命令"
 
         location = self.text.strip()
         if not location:

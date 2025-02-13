@@ -91,7 +91,7 @@ class API:
         :param sex: 性别
         :return: 设置账号信息
         """
-        return await (
+        return (
             "/set_qq_profile",
             {"nickname": nickname, "personal_note": personal_note, "sex": sex},
         )
@@ -102,7 +102,7 @@ class API:
         :param phone_number: 手机号
         :return: 获取用户名片
         """
-        return await (
+        return (
             "/ArkSharePeer",
             {"user_id": user_id, "phoneNumber": phone_number},
         )
@@ -113,7 +113,7 @@ class API:
         :param phone_number: 手机号
         :return: 获取群名片
         """
-        return await (
+        return (
             "/ArkSharePeer",
             {"group_id": group_id, "phoneNumber": phone_number},
         )
@@ -123,7 +123,7 @@ class API:
         :param group_id: 群号
         :return: 获取群共享名片
         """
-        return await ("/ArkShareGroup", {"group_id": group_id})
+        return ("/ArkShareGroup", {"group_id": group_id})
 
     async def set_online_status(self, status: str):
         """
@@ -132,20 +132,20 @@ class API:
         """
         if hasattr(Status, status):
             status = getattr(Status, status)
-        return await ("/set_online_status", dict(status))
+        return ("/set_online_status", dict(status))
 
     async def get_friends_with_category(self):
         """
         :return: 获取好友列表
         """
-        return await ("/get_friends_with_category", {})
+        return ("/get_friends_with_category", {})
 
     async def set_qq_avatar(self, avatar: str):
         """
         :param avatar: 头像路径，支持本地路径和网络路径
         :return: 设置头像
         """
-        return await ("/set_qq_avatar", {"file": avatar})
+        return ("/set_qq_avatar", {"file": avatar})
 
     async def send_like(self, user_id: str, times: int):
         """
@@ -153,7 +153,7 @@ class API:
         :param times: 次数
         :return: 发送赞
         """
-        return await ("/send_like", {"user_id": user_id, "times": times})
+        return ("/send_like", {"user_id": user_id, "times": times})
 
     async def create_collection(self, rawdata: str, brief: str):
         """
@@ -161,7 +161,7 @@ class API:
         :param brief: 标题
         :return: 创建收藏
         """
-        return await ("/create_collection", {"rawData": rawdata, "brief": brief})
+        return ("/create_collection", {"rawData": rawdata, "brief": brief})
 
     async def set_friend_add_request(self, flag: str, approve: bool, remark: str):
         """
@@ -170,7 +170,7 @@ class API:
         :param remark: 备注
         :return: 设置好友请求
         """
-        return await (
+        return (
             "/set_friend_add_request",
             {"flag": flag, "approve": approve, "remark": remark},
         )
@@ -180,34 +180,34 @@ class API:
         :param longnick: 个性签名内容
         :return: 设置个性签名
         """
-        return await ("/set_self_longnick", {"longNick": longnick})
+        return ("/set_self_longnick", {"longNick": longnick})
 
     async def get_stranger_info(self, user_id: Union[int, str]):
         """
         :param user_id: QQ号
         :return: 获取陌生人信息
         """
-        return await ("/get_stranger_info", {"user_id": user_id})
+        return ("/get_stranger_info", {"user_id": user_id})
 
     async def get_friend_list(self, cache: bool):
         """
         :param cache: 是否使用缓存
         :return: 获取好友列表
         """
-        return await ("/get_friend_list", {"no_cache": cache})
+        return ("/get_friend_list", {"no_cache": cache})
 
     async def get_profile_like(self):
         """
         :return: 获取个人资料卡点赞数
         """
-        return await ("/get_profile_like", {})
+        return ("/get_profile_like", {})
 
     async def fetch_custom_face(self, count: int):
         """
         :param count: 数量
         :return: 获取收藏表情
         """
-        return await ("/fetch_custom_face", {"count": count})
+        return ("/fetch_custom_face", {"count": count})
 
     async def upload_private_file(self, user_id: Union[int, str], file: str, name: str):
         """
@@ -216,7 +216,7 @@ class API:
         :param name: 文件名
         :return: 上传私聊文件
         """
-        return await (
+        return (
             "/upload_private_file",
             {"user_id": user_id, "file": file, "name": name},
         )
@@ -235,7 +235,7 @@ class API:
         :param temp_both_del: 双向删除
         :return: 删除好友
         """
-        return await (
+        return (
             "/delete_friend",
             {
                 "user_id": user_id,
@@ -250,14 +250,14 @@ class API:
         :param user_id: QQ号
         :return: 获取用户状态
         """
-        return await ("/nc_get_user_status", {"user_id": user_id})
+        return ("/nc_get_user_status", {"user_id": user_id})
 
     async def get_mini_app_ark(self, app_json: dict):
         """
         :param app_json: 小程序JSON
         :return: 获取小程序ARK
         """
-        return await ("/get_mini_app_ark", app_json)
+        return ("/get_mini_app_ark", app_json)
 
     # TODO: 消息接口
     async def mark_msg_as_read(
@@ -269,50 +269,50 @@ class API:
         :return: 设置消息已读
         """
         if group_id:
-            return await ("/mark_msg_as_read", {"group_id": group_id})
+            return ("/mark_msg_as_read", {"group_id": group_id})
         elif user_id:
-            return await ("/mark_msg_as_read", {"user_id": user_id})
+            return ("/mark_msg_as_read", {"user_id": user_id})
 
     async def mark_group_msg_as_read(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 设置群聊已读
         """
-        return await ("/mark_group_msg_as_read", {"group_id": group_id})
+        return ("/mark_group_msg_as_read", {"group_id": group_id})
 
     async def mark_private_msg_as_read(self, user_id: Union[int, str]):
         """
         :param user_id: QQ号
         :return: 设置私聊已读
         """
-        return await ("/mark_private_msg_as_read", {"user_id": user_id})
+        return ("/mark_private_msg_as_read", {"user_id": user_id})
 
     async def mark_all_as_read(self):
         """
         :return: 设置所有消息已读
         """
-        return await ("/_mark_all_as_read", {})
+        return ("/_mark_all_as_read", {})
 
     async def delete_msg(self, message_id: Union[int, str]):
         """
         :param message_id: 消息ID
         :return: 删除消息
         """
-        return await ("/delete_msg", {"message_id": message_id})
+        return ("/delete_msg", {"message_id": message_id})
 
     async def get_msg(self, message_id: Union[int, str]):
         """
         :param message_id: 消息ID
         :return: 获取消息
         """
-        return await ("/get_msg", {"message_id": message_id})
+        return ("/get_msg", {"message_id": message_id})
 
     async def get_image(self, image_id: str):
         """
         :param image_id: 图片ID
         :return: 获取图片消息详情
         """
-        return await ("/get_image", {"file_id": image_id})
+        return ("/get_image", {"file_id": image_id})
 
     async def get_record(self, record_id: str, output_type: str = "mp3"):
         """
@@ -320,14 +320,14 @@ class API:
         :param output_type: 输出类型，枚举值:mp3 amr wma m4a spx ogg wav flac,默认为mp3
         :return: 获取语音消息详情
         """
-        return await ("/get_record", {"file_id": record_id, "out_format": output_type})
+        return ("/get_record", {"file_id": record_id, "out_format": output_type})
 
     async def get_file(self, file_id: str):
         """
         :param file_id: 文件ID
         :return: 获取文件消息详情
         """
-        return await ("/get_file", {"file_id": file_id})
+        return ("/get_file", {"file_id": file_id})
 
     async def get_group_msg_history(
         self,
@@ -343,7 +343,7 @@ class API:
         :param reverse_order: 是否倒序
         :return: 获取群消息历史记录
         """
-        return await (
+        return (
             "/get_group_msg_history",
             {
                 "group_id": group_id,
@@ -362,7 +362,7 @@ class API:
         :param emoji_set: 设置
         :return: 设置消息表情点赞
         """
-        return await (
+        return (
             "/set_msg_emoji_like",
             {"message_id": message_id, "emoji_id": emoji_id, "set": emoji_set},
         )
@@ -381,7 +381,7 @@ class API:
         :param reverse_order: 是否倒序
         :return: 获取好友消息历史记录
         """
-        return await (
+        return (
             "/get_friend_msg_history",
             {
                 "user_id": user_id,
@@ -397,7 +397,7 @@ class API:
         :param count: 会话数量
         :return: 最近消息列表
         """
-        return await ("/get_recent_contact", {"count": count})
+        return ("/get_recent_contact", {"count": count})
 
     async def fetch_emoji_like(
         self,
@@ -419,7 +419,7 @@ class API:
         """
         if group_id:
             if count:
-                return await (
+                return (
                     "/fetch_emoji_like",
                     {
                         "message_id": message_id,
@@ -430,7 +430,7 @@ class API:
                     },
                 )
             else:
-                return await (
+                return (
                     "/fetch_emoji_like",
                     {
                         "message_id": message_id,
@@ -441,7 +441,7 @@ class API:
                 )
         elif user_id:
             if count:
-                return await (
+                return (
                     "/fetch_emoji_like",
                     {
                         "message_id": message_id,
@@ -452,7 +452,7 @@ class API:
                     },
                 )
             else:
-                return await (
+                return (
                     "/fetch_emoji_like",
                     {
                         "message_id": message_id,
@@ -467,7 +467,7 @@ class API:
         :param message_id: 消息ID
         :return: 获取合并转发消息
         """
-        return await ("/get_forward_msg", {"message_id": message_id})
+        return ("/get_forward_msg", {"message_id": message_id})
 
     async def send_poke(
         self, user_id: Union[int, str], group_id: Union[int, str] = None
@@ -478,9 +478,9 @@ class API:
         :return: 发送戳一戳
         """
         if group_id:
-            return await ("/send_poke", {"user_id": user_id, "group_id": group_id})
+            return ("/send_poke", {"user_id": user_id, "group_id": group_id})
         else:
-            return await ("/send_poke", {"user_id": user_id})
+            return ("/send_poke", {"user_id": user_id})
 
     async def forward_friend_single_msg(
         self, message_id: str, user_id: Union[int, str]
@@ -490,7 +490,7 @@ class API:
         :param user_id: 发送对象QQ号
         :return: 转发好友消息
         """
-        return await (
+        return (
             "/forward_friend_single_msg",
             {"user_id": user_id, "message_id": message_id},
         )
@@ -505,7 +505,7 @@ class API:
         """
         payload = await self._construct_forward_message(messages)
         payload["user_id"] = user_id
-        return await ("/send_private_forward_msg", payload)
+        return ("/send_private_forward_msg", payload)
 
     # TODO: 群组接口
     async def set_group_kick(
@@ -520,7 +520,7 @@ class API:
         :param reject_add_request: 是否群拉黑
         :return: 踢出群成员
         """
-        return await (
+        return (
             "/set_group_kick",
             {
                 "group_id": group_id,
@@ -538,7 +538,7 @@ class API:
         :param duration: 禁言时长,单位秒,0为取消禁言
         :return: 群组禁言
         """
-        return await (
+        return (
             "/set_group_ban",
             {"group_id": group_id, "user_id": user_id, "duration": duration},
         )
@@ -548,14 +548,14 @@ class API:
         :param group_id: 群号
         :return: 获取群系统消息
         """
-        return await ("/get_group_system_msg", {"group_id": group_id})
+        return ("/get_group_system_msg", {"group_id": group_id})
 
     async def get_essence_msg_list(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取精华消息列表
         """
-        return await ("/get_essence_msg_list", {"group_id": group_id})
+        return ("/get_essence_msg_list", {"group_id": group_id})
 
     async def set_group_whole_ban(self, group_id: Union[int, str], enable: bool):
         """
@@ -563,7 +563,7 @@ class API:
         :param enable: 是否禁言
         :return: 群组全员禁言
         """
-        return await ("/set_group_whole_ban", {"group_id": group_id, "enable": enable})
+        return ("/set_group_whole_ban", {"group_id": group_id, "enable": enable})
 
     async def set_group_portrait(self, group_id: Union[int, str], file: str):
         """
@@ -571,7 +571,7 @@ class API:
         :param file: 文件路径,支持网络路径和本地路径
         :return: 设置群头像
         """
-        return await ("/set_group_portrait", {"group_id": group_id, "file": file})
+        return ("/set_group_portrait", {"group_id": group_id, "file": file})
 
     async def set_group_admin(
         self, group_id: Union[int, str], user_id: Union[int, str], enable: bool
@@ -582,7 +582,7 @@ class API:
         :param enable: 是否设置为管理
         :return: 设置群管理员
         """
-        return await (
+        return (
             "/set_group_admin",
             {"group_id": group_id, "user_id": user_id, "enable": enable},
         )
@@ -592,7 +592,7 @@ class API:
         :param message_id: 消息ID
         :return: 设置精华消息
         """
-        return await ("/set_essence_msg", {"message_id": message_id})
+        return ("/set_essence_msg", {"message_id": message_id})
 
     async def set_group_card(
         self, group_id: Union[int, str], user_id: Union[int, str], card: str
@@ -603,7 +603,7 @@ class API:
         :param card: 群名片,为空则为取消群名片
         :return: 设置群名片
         """
-        return await (
+        return (
             "/set_group_card",
             {"group_id": group_id, "user_id": user_id, "card": card},
         )
@@ -613,7 +613,7 @@ class API:
         :param message_id: 消息ID
         :return: 删除精华消息
         """
-        return await ("/delete_essence_msg", {"message_id": message_id})
+        return ("/delete_essence_msg", {"message_id": message_id})
 
     async def set_group_name(self, group_id: Union[int, str], group_name: str):
         """
@@ -621,7 +621,7 @@ class API:
         :param group_name: 群名
         :return: 设置群名
         """
-        return await (
+        return (
             "/set_group_name",
             {"group_id": group_id, "group_name": group_name},
         )
@@ -631,7 +631,7 @@ class API:
         :param group_id: 群号
         :return: 退出群组
         """
-        return await ("/set_group_leave", {"group_id": group_id})
+        return ("/set_group_leave", {"group_id": group_id})
 
     async def send_group_notice(
         self, group_id: Union[int, str], content: str, image: str = None
@@ -643,12 +643,12 @@ class API:
         :return: 发送群公告
         """
         if image:
-            return await (
+            return (
                 "/_send_group_notice",
                 {"group_id": group_id, "content": content, "image": image},
             )
         else:
-            return await (
+            return (
                 "/_send_group_notice",
                 {"group_id": group_id, "content": content},
             )
@@ -658,7 +658,7 @@ class API:
         :param group_id: 群号
         :return: 获取群公告
         """
-        return await ("/_get_group_notice", {"group_id": group_id})
+        return ("/_get_group_notice", {"group_id": group_id})
 
     async def set_group_special_title(
         self, group_id: Union[int, str], user_id: Union[int, str], special_title: str
@@ -669,7 +669,7 @@ class API:
         :param special_title: 群头衔
         :return: 设置群头衔
         """
-        return await (
+        return (
             "/set_group_special_title",
             {"group_id": group_id, "user_id": user_id, "special_title": special_title},
         )
@@ -684,7 +684,7 @@ class API:
         :param folder_id: 文件夹ID
         :return: 上传群文件
         """
-        return await (
+        return (
             "/upload_group_file",
             {"group_id": group_id, "file": file, "name": name, "folder_id": folder_id},
         )
@@ -697,9 +697,9 @@ class API:
         :return: 处理加群请求
         """
         if approve:
-            return await ("/set_group_add_request", {"flag": flag, "approve": approve})
+            return ("/set_group_add_request", {"flag": flag, "approve": approve})
         else:
-            return await (
+            return (
                 "/set_group_add_request",
                 {"flag": flag, "approve": approve, "reason": reason},
             )
@@ -709,14 +709,14 @@ class API:
         :param group_id: 群号
         :return: 获取群信息
         """
-        return await ("/get_group_info", {"group_id": group_id})
+        return ("/get_group_info", {"group_id": group_id})
 
     async def get_group_info_ex(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取群信息(拓展)
         """
-        return await ("/get_group_info_ex", {"group_id": group_id})
+        return ("/get_group_info_ex", {"group_id": group_id})
 
     async def create_group_file_folder(
         self, group_id: Union[int, str], folder_name: str
@@ -726,7 +726,7 @@ class API:
         :param folder_name: 文件夹名
         :return: 创建群文件文件夹
         """
-        return await (
+        return (
             "/create_group_file_folder",
             {"group_id": group_id, "folder_name": folder_name},
         )
@@ -737,7 +737,7 @@ class API:
         :param file_id: 文件ID
         :return: 删除群文件
         """
-        return await ("/delete_group_file", {"group_id": group_id, "file_id": file_id})
+        return ("/delete_group_file", {"group_id": group_id, "file_id": file_id})
 
     async def delete_group_folder(self, group_id: Union[int, str], folder_id: str):
         """
@@ -745,7 +745,7 @@ class API:
         :param folder_id: 文件夹ID
         :return: 删除群文件文件夹
         """
-        return await (
+        return (
             "/delete_group_folder",
             {"group_id": group_id, "folder_id": folder_id},
         )
@@ -755,14 +755,14 @@ class API:
         :param group_id: 群号
         :return: 获取群文件系统信息
         """
-        return await ("/get_group_file_system_info", {"group_id": group_id})
+        return ("/get_group_file_system_info", {"group_id": group_id})
 
     async def get_group_root_files(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取群根目录文件列表
         """
-        return await ("/get_group_root_files", {"group_id": group_id})
+        return ("/get_group_root_files", {"group_id": group_id})
 
     async def get_group_files_by_folder(
         self, group_id: Union[int, str], folder_id: str, file_count: int
@@ -773,7 +773,7 @@ class API:
         :param file_count: 文件数量
         :return: 获取群文件列表
         """
-        return await (
+        return (
             "/get_group_files_by_folder",
             {"group_id": group_id, "folder_id": folder_id, "file_count": file_count},
         )
@@ -784,14 +784,14 @@ class API:
         :param file_id: 文件ID
         :return: 获取群文件URL
         """
-        return await ("/get_group_file_url", {"group_id": group_id, "file_id": file_id})
+        return ("/get_group_file_url", {"group_id": group_id, "file_id": file_id})
 
     async def get_group_list(self, no_cache: bool = False):
         """
         :param no_cache: 不缓存，默认为false
         :return: 获取群列表
         """
-        return await ("/get_group_list", {"no_cache": no_cache})
+        return ("/get_group_list", {"no_cache": no_cache})
 
     async def get_group_member_info(
         self, group_id: Union[int, str], user_id: Union[int, str], no_cache: bool
@@ -802,7 +802,7 @@ class API:
         :param no_cache: 不缓存
         :return: 获取群成员信息
         """
-        return await (
+        return (
             "/get_group_member_info",
             {"group_id": group_id, "user_id": user_id, "no_cache": no_cache},
         )
@@ -815,7 +815,7 @@ class API:
         :param no_cache: 不缓存
         :return: 获取群成员列表
         """
-        return await (
+        return (
             "/get_group_member_list",
             {"group_id": group_id, "no_cache": no_cache},
         )
@@ -825,35 +825,35 @@ class API:
         :param group_id: 群号
         :return: 获取群荣誉信息
         """
-        return await ("/get_group_honor_info", {"group_id": group_id})
+        return ("/get_group_honor_info", {"group_id": group_id})
 
     async def get_group_at_all_remain(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取群 @全体成员 剩余次数
         """
-        return await ("/get_group_at_all_remain", {"group_id": group_id})
+        return ("/get_group_at_all_remain", {"group_id": group_id})
 
     async def get_group_ignored_notifies(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取群过滤系统消息
         """
-        return await ("/get_group_ignored_notifies", {"group_id": group_id})
+        return ("/get_group_ignored_notifies", {"group_id": group_id})
 
     async def set_group_sign(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 群打卡
         """
-        return await ("/set_group_sign", {"group_id": group_id})
+        return ("/set_group_sign", {"group_id": group_id})
 
     async def send_group_sign(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 群打卡
         """
-        return await ("/send_group_sign", {"group_id": group_id})
+        return ("/send_group_sign", {"group_id": group_id})
 
     async def get_ai_characters(
         self, group_id: Union[int, str], chat_type: Union[int, str]
@@ -863,7 +863,7 @@ class API:
         :param chat_type: 聊天类型
         :return: 获取AI语音人物
         """
-        return await (
+        return (
             "/get_ai_characters",
             {"group_id": group_id, "chat_type": chat_type},
         )
@@ -877,7 +877,7 @@ class API:
         :param text: 文本
         :return: 发送群AI语音
         """
-        return await (
+        return (
             "/send_group_ai_record",
             {"group_id": group_id, "character": character, "text": text},
         )
@@ -889,7 +889,7 @@ class API:
         :param text: 文本
         :return: 获取AI语音
         """
-        return await (
+        return (
             "/get_ai_record",
             {"group_id": group_id, "character": character, "text": text},
         )
@@ -902,7 +902,7 @@ class API:
         :param group_id: 群号
         :return: 转发群聊消息
         """
-        return await (
+        return (
             "/forward_group_single_msg",
             {"group_id": group_id, "message_id": message_id},
         )
@@ -921,47 +921,47 @@ class API:
         payload = await self._construct_forward_message(messages)
         payload["group_id"] = group_id
 
-        return await ("/send_private_forward_msg", payload)
+        return ("/send_private_forward_msg", payload)
 
     # TODO: 系统接口
     async def get_client_key(self):
         """
         :return: 获取client_key
         """
-        return await ("/get_clientkey", {})
+        return ("/get_clientkey", {})
 
     async def get_robot_uin_range(self):
         """
         :return: 获取机器人QQ号范围
         """
-        return await ("/get_robot_uin_range", {})
+        return ("/get_robot_uin_range", {})
 
     async def ocr_image(self, image: str):
         """
         :param image: 图片路径，支持本地路径和网络路径
         :return: OCR 图片识别
         """
-        return await ("/ocr_image", {"image": image})
+        return ("/ocr_image", {"image": image})
 
     async def ocr_image_new(self, image: str):
         """
         :param image: 图片路径，支持本地路径和网络路径
         :return: OCR 图片识别
         """
-        return await ("/.ocr_image", {"image": image})
+        return ("/.ocr_image", {"image": image})
 
     async def translate_en2zh(self, words: list):
         """
         :param words: 待翻译的单词列表
         :return: 英文翻译为中文
         """
-        return await ("/translate_en2zh", {"words": words})
+        return ("/translate_en2zh", {"words": words})
 
     async def get_login_info(self):
         """
         :return: 获取登录号信息
         """
-        return await ("/get_login_info", {})
+        return ("/get_login_info", {})
 
     async def set_input_status(self, event_type: int, user_id: Union[int, str]):
         """
@@ -969,7 +969,7 @@ class API:
         :param user_id: QQ号
         :return: 设置输入状态
         """
-        return await (
+        return (
             "/set_input_status",
             {"eventType": event_type, "user_id": user_id},
         )
@@ -992,7 +992,7 @@ class API:
         """
         if base64:
             if name:
-                return await (
+                return (
                     "/download_file",
                     {
                         "thread_count": thread_count,
@@ -1002,7 +1002,7 @@ class API:
                     },
                 )
             else:
-                return await (
+                return (
                     "/download_file",
                     {
                         "thread_count": thread_count,
@@ -1012,7 +1012,7 @@ class API:
                 )
         elif url:
             if name:
-                return await (
+                return (
                     "/download_file",
                     {
                         "thread_count": thread_count,
@@ -1022,7 +1022,7 @@ class API:
                     },
                 )
             else:
-                return await (
+                return (
                     "/download_file",
                     {"thread_count": thread_count, "headers": headers, "url": url},
                 )
@@ -1032,7 +1032,7 @@ class API:
         :param domain: 域名
         :return: 获取cookies
         """
-        return await ("/get_cookies", {"domain": domain})
+        return ("/get_cookies", {"domain": domain})
 
     async def handle_quick_operation(self, context: dict, operation: dict):
         """
@@ -1040,7 +1040,7 @@ class API:
         :param operation: 快速操作对象
         :return: 对事件执行快速操作
         """
-        return await (
+        return (
             "/.handle_quick_operation",
             {"context": context, "operation": operation},
         )
@@ -1049,7 +1049,7 @@ class API:
         """
         :return: 获取 CSRF Token
         """
-        return await ("/get_csrf_token", {})
+        return ("/get_csrf_token", {})
 
     async def del_group_notice(self, group_id: Union[int, str], notice_id: str):
         """
@@ -1057,7 +1057,7 @@ class API:
         :param notice_id: 通知ID
         :return: 删除群公告
         """
-        return await (
+        return (
             "/_del_group_notice",
             {"group_id": group_id, "notice_id": notice_id},
         )
@@ -1067,57 +1067,57 @@ class API:
         :param domain: 域名
         :return: 获取 QQ 相关接口凭证
         """
-        return await ("/get_credentials", {"domain": domain})
+        return ("/get_credentials", {"domain": domain})
 
     async def get_model_show(self, model: str):
         """
         :param model: 模型名
         :return: 获取模型显示
         """
-        return await ("/_get_model_show", {"model": model})
+        return ("/_get_model_show", {"model": model})
 
     async def can_send_image(self):
         """
         :return: 检查是否可以发送图片
         """
-        return await ("/can_send_image", {})
+        return ("/can_send_image", {})
 
     async def nc_get_packet_status(self):
         """
         :return: 获取packet状态
         """
-        return await ("/nc_get_packet_status", {})
+        return ("/nc_get_packet_status", {})
 
     async def can_send_record(self):
         """
         :return: 检查是否可以发送语音
         """
-        return await ("/can_send_record", {})
+        return ("/can_send_record", {})
 
     async def get_status(self):
         """
         :return: 获取状态
         """
-        return await ("/get_status", {})
+        return ("/get_status", {})
 
     async def nc_get_rkey(self):
         """
         :return: 获取rkey
         """
-        return await ("/nc_get_rkey", {})
+        return ("/nc_get_rkey", {})
 
     async def get_version_info(self):
         """
         :return: 获取版本信息
         """
-        return await ("/get_version_info", {})
+        return ("/get_version_info", {})
 
     async def get_group_shut_list(self, group_id: Union[int, str]):
         """
         :param group_id: 群号
         :return: 获取群禁言列表
         """
-        return await ("/get_group_shut_list", {"group_id": group_id})
+        return ("/get_group_shut_list", {"group_id": group_id})
 
     async def post_group_msg(
         self,
@@ -1316,7 +1316,7 @@ class API:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"group_id": group_id, "message": message}
-        return await ("/send_group_msg", params)
+        return ("/send_group_msg", params)
 
     async def post_private_file(
         self,
@@ -1364,7 +1364,7 @@ class API:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"user_id": user_id, "message": message}
-        return await ("/send_private_msg", params)
+        return ("/send_private_msg", params)
 
 
 PERO_API = API()

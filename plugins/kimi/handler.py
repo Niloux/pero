@@ -18,12 +18,6 @@ client = OpenAI(
 @MessageAdapter.register_handler("message", "at")
 async def kimi_text(event: Dict):
     # 找出text消息
-    if event.get("sender_type") != "private":
-        return await PERO_API.post_group_msg(
-            group_id=event.get("target"),
-            text="私人测试功能喵～",
-            reply=event.get("reply"),
-        )
     logger.info(f"kimi收到消息: {event}")
     for content in event.get("content"):
         if content.get("type") == "text":

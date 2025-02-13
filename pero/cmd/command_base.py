@@ -5,6 +5,6 @@ class Command:
         self.command = command
         self.text = text
 
-    async def execute(self) -> bool:
+    async def execute(self) -> str:
         """命令执行的具体实现"""
         raise NotImplementedError
