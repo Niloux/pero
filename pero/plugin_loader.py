@@ -2,9 +2,7 @@ import importlib
 import sys
 from pathlib import Path
 
-from pero.logger import get_log
-
-_log = get_log()
+from pero.utils.logger import logger
 
 
 async def load_plugins(plugin_dir="plugins"):
@@ -16,7 +14,7 @@ async def load_plugins(plugin_dir="plugins"):
     # 确保插件目录在 sys.path 中
     if str(current_dir) not in sys.path:
         sys.path.append(str(current_dir))
-        _log.info(f"将当前目录添加到 sys.path: {current_dir}")
+        logger.info(f"将当前目录添加到 sys.path: {current_dir}")
 
     # 加载插件
     loaded_plugins = []
@@ -25,11 +23,11 @@ async def load_plugins(plugin_dir="plugins"):
         try:
             importlib.import_module(module_name)  # 导入插件模块
             loaded_plugins.append(module_file.parent.name)
-            _log.info(f"已加载插件: {module_file.parent.name}")
+            logger.info(f"已加载插件: {module_file.parent.name}")
         except ModuleNotFoundError:
-            _log.error(f"插件未找到: {module_file.parent.name}")
+            logger.error(f"插件未找到: {module_file.parent.name}")
         except Exception as e:
-            _log.error(f"加载插件 {module_file.parent.name} 时出错: {e}")
+            logger.error(f"加载插件 {module_file.parent.name} 时出错: {e}")
 
     return loaded_plugins
 
@@ -47,9 +45,9 @@ class PluginReloader:
             if name.startswith(f"{plugin_dir}."):
                 try:
                     del sys.modules[name]  # 卸载插件模块
-                    _log.info(f"已卸载插件模块: {name}")
+                    logger.info(f"已卸载插件模块: {name}")
                 except KeyError:
-                    _log.warning(f"插件模块 {name} 卸载失败")
+                    logger.warning(f"插件模块 {name} 卸载失败")
 
         # 重新加载插件
         if str(current_dir) not in sys.path:
@@ -61,8 +59,8 @@ class PluginReloader:
                 module = importlib.import_module(module_name)
                 importlib.reload(module)  # 强制重新加载模块
                 reloaded_plugins.append(module_file.parent.name)
-                _log.info(f"已重新加载插件: {module_file.parent.name}")
+                logger.info(f"已重新加载插件: {module_file.parent.name}")
             except Exception as e:
-                _log.error(f"重新加载插件 {module_file.parent.name} 失败: {e}")
+                logger.error(f"重新加载插件 {module_file.parent.name} 失败: {e}")
 
         return reloaded_plugins

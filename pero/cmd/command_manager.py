@@ -1,11 +1,9 @@
 import re
 from typing import Dict
 
-from pero.api import BotAPI
+from pero.api import PERO_API
 from pero.cmd.commander import Command
-from pero.logger import get_log
-
-_log = get_log()
+from pero.utils.logger import logger
 
 
 class CommandParser:
@@ -35,9 +33,9 @@ class CommandManager:
     def register(self, command_name: str, command_class: Command):
         """注册命令到命令管理器"""
         self.commands[command_name] = command_class
-        _log.info(f"register cmd: {command_name}--{command_class}")
+        logger.info(f"register cmd: {command_name}--{command_class}")
 
-    async def execute(self, event: Dict, api: BotAPI) -> bool:
+    async def execute(self, event: Dict) -> bool:
         """根据命令解析执行对应的命令"""
         # 从 event 中提取文本并解析命令
         text = await self._extract_text(event)
@@ -56,15 +54,15 @@ class CommandManager:
                 command_instance = command_class(command_name, command_text)
                 response = await command_instance.execute()
                 # 回显响应
-                await self._send_response(event, api, response)
+                await self._send_response(event, response)
             else:
                 # 如果命令不存在，则返回无效命令响应
-                await self._send_response(event, api, f"{command_name}命令无效喵！")
+                await self._send_response(event, f"{command_name}命令无效喵！")
                 return False
         except ValueError:
             # 命令格式错误
             await self._send_response(
-                event, api, f"{command_name}无效的命令格式喵！请确保命令格式正确。"
+                event, f"{command_name}无效的命令格式喵！请确保命令格式正确。"
             )
             return False
 
@@ -75,12 +73,16 @@ class CommandManager:
                 return content.get("data", {}).get("text", "")
         return ""
 
-    async def _send_response(self, event: Dict, api: BotAPI, message: str):
+    async def _send_response(self, event: Dict, message: str):
         """根据event中的类型发送回复"""
         if event.get("source_type") == "private":
-            await api.post_private_msg(user_id=event.get("target"), text=message)
+            return await PERO_API.post_private_msg(
+                user_id=event.get("target"), text=message
+            )
         elif event.get("source_type") == "group":
-            await api.post_group_msg(group_id=event.get("target"), text=message)
+            return await PERO_API.post_group_msg(
+                group_id=event.get("target"), text=message
+            )
 
 
 # 创建 CommandManager 实例

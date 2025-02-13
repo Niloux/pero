@@ -6,13 +6,11 @@ import aiohttp
 
 from pero.cmd.command_manager import register_command
 from pero.cmd.commander import Command
-from pero.config import CONFIG
-from pero.logger import get_log
+from pero.utils.config import config
+from pero.utils.logger import logger
 
-_log = get_log()
-
-WEATHER_KEY = CONFIG.WEATHER_KEY
-LOCATION_KEY = CONFIG.LOCATION_KEY
+WEATHER_KEY = config.WEATHER_KEY
+LOCATION_KEY = config.LOCATION_KEY
 
 
 class WeatherService:
@@ -45,7 +43,7 @@ class WeatherService:
 
         data = await self.fetch_json(url)
         if data.get("status") != 0:
-            _log.error(f"获取经纬度失败: {data.get('message')}")
+            logger.error(f"获取经纬度失败: {data.get('message')}")
             return None, None
 
         location = data.get("result", {}).get("location", {})
@@ -57,7 +55,7 @@ class WeatherService:
 
         data = await self.fetch_json(url)
         if not data:
-            _log.error("获取天气信息失败")
+            logger.error("获取天气信息失败")
             return "无法获取天气信息, 可能是网络异常, 请重试"
 
         location = data.get("name", "未知地点")
@@ -98,8 +96,8 @@ class Forecast(Command):
             return await self.get_forecast(location)
         except Exception as e:
             error_msg = f"获取天气失败: {str(e)}"
-            _log.error(error_msg)
-            _log.error(traceback.format_exc())
+            logger.error(error_msg)
+            logger.error(traceback.format_exc())
             return error_msg
 
     async def get_forecast(self, city: str) -> str:

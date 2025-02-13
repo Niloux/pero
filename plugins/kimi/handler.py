@@ -2,12 +2,12 @@ from typing import Dict
 
 from openai import OpenAI
 
-from pero.api import BotAPI
-from pero.config import CONFIG
-from pero.logger import get_log
-from pero.router import MessageAdapter
+from pero.api import PERO_API
+from pero.message_adapter import MessageAdapter
+from pero.utils.config import config
+from pero.utils.logger import logger
 
-api_key = CONFIG.kimi_api
+api_key = config.kimi_api
 
 client = OpenAI(
     api_key=api_key,
@@ -15,14 +15,16 @@ client = OpenAI(
 )
 
 
-_log = get_log()
-
-
-@MessageAdapter.register_message(
-    message_type="at", source_type="group", sender_type="normal"
-)
-async def kimi_text(event: Dict, api: BotAPI):
+@MessageAdapter.register_handler("message", "at")
+async def kimi_text(event: Dict):
     # 找出text消息
+    if event.get("sender_type") != "private":
+        return await PERO_API.post_group_msg(
+            group_id=event.get("target"),
+            text="私人测试功能喵～",
+            reply=event.get("reply"),
+        )
+    logger.info(f"kimi收到消息: {event}")
     for content in event.get("content"):
         if content.get("type") == "text":
             text = content.get("data").get("text")
@@ -40,6 +42,7 @@ async def kimi_text(event: Dict, api: BotAPI):
     )
 
     result = completion.choices[0].message.content
-    await api.post_group_msg(
-        group_id=event.get("target"), text=result, reply=event.get("reply")
+    logger.info(f"kimi回复消息{result}")
+    return await PERO_API.post_private_msg(
+        user_id=event.get("target"), text=result, reply=event.get("reply")
     )

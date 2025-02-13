@@ -187,3 +187,6 @@ config.yaml
 
 #测试用的数据结构文件
 text.py
+
+#log文件
+logs/

@@ -1,1 +1,0 @@
-REQUEST_SUCCESS = "ok"

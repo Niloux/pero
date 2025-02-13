@@ -2,10 +2,8 @@ import traceback
 
 from pero.cmd.command_manager import register_command
 from pero.cmd.commander import Command
-from pero.logger import get_log
 from pero.plugin_loader import PluginReloader
-
-_log = get_log()
+from pero.utils.logger import logger
 
 
 @register_command("reload")
@@ -30,8 +28,8 @@ class Reload(Command):
                         return response
                     except Exception as e:
                         error_msg = f"插件重载失败: {str(e)}"
-                        _log.error(error_msg)
-                        _log.error(traceback.format_exc())
+                        logger.error(error_msg)
+                        logger.error(traceback.format_exc())
                         return error_msg
                 else:
                     response = "命令参数无效！请不要在`/reload`命令后添加任何内容喵~"
@@ -39,5 +37,5 @@ class Reload(Command):
         except ValueError:
             # 如果解析失败，返回错误消息
             error_msg = f"无法解析命令: {self.text}"
-            _log.error(error_msg)
+            logger.error(error_msg)
             return error_msg
