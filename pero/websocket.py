@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import json as Json
 from typing import Dict
@@ -15,14 +14,6 @@ class WebSocketClient:
         self.uri = uri
         self.websocket = None
         self.is_connected = False
-
-        self.lock = asyncio.Lock()
-
-        # 创建 POST 请求队列
-        self.post_queue = asyncio.Queue()
-
-        # 启动一个任务来处理队列中的请求
-        asyncio.create_task(self._process_post_queue())
 
     async def __aenter__(self):
         """进入异步上下文管理器"""
@@ -44,22 +35,6 @@ class WebSocketClient:
             _log.error(f"Failed to connect to {self.uri}: {e}")
             self.is_connected = False
 
-    async def _process_post_queue(self):
-        """处理 POST 请求队列"""
-        while True:
-            action, params, json_data = await self.post_queue.get()  # 获取队列中的请求
-            await self._send_post(action, params, json_data)  # 处理请求
-            self.post_queue.task_done()  # 标记请求处理完成
-
-    async def post(self, action, params=None, json=None):
-        """将 POST 请求添加到队列"""
-        if not self.websocket:
-            _log.error("WebSocket not connected.")
-            return
-
-        # 将请求添加到队列
-        await self.post_queue.put((action, params, json))
-
     async def _handle_lifecycle_event(self):
         """处理生命周期事件"""
         if not self.websocket:
@@ -77,7 +52,6 @@ class WebSocketClient:
             _log.error("WebSocket not connected.")
             return
         try:
-            # async with self.lock:  # 使用 async with 来自动管理锁
             await self.websocket.send(Json.dumps(msg))
             _log.info(f"Sent: {msg}")
         except Exception as e:
@@ -89,10 +63,9 @@ class WebSocketClient:
             _log.error("WebSocket not connected.")
             return ""
         try:
-            async with self.lock:  # 确保每次只有一个协程调用 receive
-                response = await self.websocket.recv()
-                _log.debug(f"Received: {response}")
-                return response
+            response = await self.websocket.recv()
+            _log.debug(f"Received: {response}")
+            return response
         except Exception as e:
             _log.error(f"Error receiving message: {e}")
             return ""
@@ -104,8 +77,17 @@ class WebSocketClient:
             self.is_connected = False
             _log.info("WebSocket connection closed.")
 
-    async def _send_post(self, action, params=None, json=None):
-        """发送 POST 请求"""
+    async def post(self, action, params=None, json=None):
+        """发送 POST 请求
+
+        Args:
+            action (str): 请求的动作类型。
+            params (dict, optional): 请求的参数。默认为 None。
+            json (dict, optional): 请求的 JSON 数据。默认为 None。
+
+        Returns:
+            None
+        """
         if not self.websocket:
             _log.error("WebSocket not connected.")
             return
@@ -118,11 +100,10 @@ class WebSocketClient:
             }
 
             _log.debug(f"Sent: {action=}, {payload=}")
-            async with self.lock:  # 确保每次只有一个请求在发送
-                await self.websocket.send(Json.dumps(payload))
-                response = Json.loads(await self.websocket.recv())
-                _log.debug(f"Recv: {response=}")
-                return response
+            await self.send(payload)
+            response = Json.loads(await self.websocket.recv())
+            _log.debug(f"Recv: {response=}")
+            return response
         except Json.JSONDecodeError as e:
             _log.error(f"JSON encoding error: {e}")
             raise e

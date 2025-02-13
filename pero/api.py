@@ -18,18 +18,9 @@ from pero.element import (
 )
 from pero.logger import get_log
 from pero.status import Status
-from pero.utils.literals import REQUEST_SUCCESS
 from pero.websocket import WebSocketClient
 
 _log = get_log()
-
-
-def check_and_log(result):
-    if result["status"] == REQUEST_SUCCESS:
-        _log.debug(result)
-    else:
-        _log.error(result)
-    return result
 
 
 class BotAPI:
@@ -1292,7 +1283,7 @@ class BotAPI:
         if not message:
             return {"code": 0, "msg": "消息不能为空"}
         params = {"user_id": user_id, "message": message}
-        return check_and_log(await self._http.post("/send_private_msg", json=params))
+        return await self._http.post("/send_private_msg", json=params)
 
     async def post_group_file(
         self,
@@ -1340,7 +1331,7 @@ class BotAPI:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"group_id": group_id, "message": message}
-        return check_and_log(await self._http.post("/send_group_msg", json=params))
+        return await self._http.post("/send_group_msg", json=params)
 
     async def post_private_file(
         self,
@@ -1388,4 +1379,4 @@ class BotAPI:
             return {"code": 0, "msg": "请至少选择一种文件"}
 
         params = {"user_id": user_id, "message": message}
-        return check_and_log(await self._http.post("/send_private_msg", json=params))
+        return await self._http.post("/send_private_msg", json=params)
