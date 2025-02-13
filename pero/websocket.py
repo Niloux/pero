@@ -101,9 +101,10 @@ class WebSocketClient:
 
             _log.debug(f"Sent: {action=}, {payload=}")
             await self.send(payload)
-            response = Json.loads(await self.websocket.recv())
-            _log.debug(f"Recv: {response=}")
-            return response
+            # response = Json.loads(await self.websocket.recv())
+            # _log.debug(f"Recv: {response=}")
+            # return response
+            return None
         except Json.JSONDecodeError as e:
             _log.error(f"JSON encoding error: {e}")
             raise e
