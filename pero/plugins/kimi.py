@@ -32,7 +32,7 @@ class KimiChatPlugin(PluginBase):
         logger.info("KimiChat plugin unloaded")
 
     @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
-    async def handle_text(self, event: Dict):
+    async def chat(self, event: Dict):
         """处理群消息"""
         try:
             # 获取任务追踪器

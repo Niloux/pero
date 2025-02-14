@@ -61,7 +61,7 @@ class PluginManager:
         self._plugin_meta: Dict[str, PluginMeta] = {}  # 插件元数据
         self._active_tasks: Set[PluginTask] = set()  # 当前活跃的任务
         self._tasks_lock = HybridLock()
-        self._reload_lock = threading.Lock()
+        self._reload_lock = HybridLock()
         self._executor = ThreadPoolExecutor()
         self._plugin_dirs: List[str] = []  # 插件目录列表
         self._file_observers: List[object] = []  # 文件监控器列表
@@ -227,7 +227,7 @@ class PluginManager:
                         module_name = os.path.splitext(
                             os.path.basename(event.src_path)
                         )[0]
-                        self._reload_module(module_name)
+                        plugin_manager._reload_module(module_name)
 
             observer = watchdog.observers.Observer()
             for plugin_dir in self._plugin_dirs:
