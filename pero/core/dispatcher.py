@@ -5,7 +5,7 @@ from pero.core.message_adapter import MessageAdapter
 from pero.utils.logger import logger
 
 
-class EventAdapter:
+class EventHandler:
     handlers = {
         "request": {},
         "notice": {},
@@ -63,6 +63,6 @@ class EventAdapter:
 
 
 # Example: Registering a handler for status events
-@EventAdapter.register_handler("status", "ok")
+@EventHandler.register_handler("status", "ok")
 async def handle_status(event: Dict[str, Any]) -> Dict[str, Any]:
     logger.info(f"napcat回应状态: {event}")

@@ -4,8 +4,8 @@ from pero.utils.logger import logger
 
 
 class EventParser:
-    @staticmethod
-    async def parse_event(msg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    @classmethod
+    async def parse_event(cls, msg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         event_type = msg.get("post_type")
         parse_method = getattr(EventParser, f"_parse_{event_type}", None)
 
@@ -13,7 +13,7 @@ class EventParser:
             return await parse_method(msg)
         else:
             if msg.get("status"):
-                return await EventParser._parse_status(msg)
+                return await cls._parse_status(msg)
             # 处理未知事件和napcat响应状态信息
             logger.warning(f"Unsupported event type: {event_type}")
             return None

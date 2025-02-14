@@ -4,7 +4,8 @@ from contextlib import AsyncExitStack
 from typing import Optional, Set
 
 from pero.cmd.command_manager import command_manager
-from pero.core.dispatcher import EventAdapter
+from pero.core.dispatcher import EventHandler
+from pero.core.event_parser import EventParser
 from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
 from pero.plugin_system.plugin_manager import plugin_manager
@@ -18,7 +19,8 @@ class Application:
     def __init__(self):
         self.plugin_manager = plugin_manager
         self.command_manager = command_manager
-        self.event_adapter = EventAdapter()
+        self.event_adapter = EventHandler()
+        self.event_parser = EventParser()
         self.task_manager: Optional[TaskManager] = None
         self.websocket: Optional[WebSocketClient] = None
         self.running_tasks: Set[asyncio.Task] = set()
@@ -36,7 +38,7 @@ class Application:
         self.websocket = await self.exit_stack.enter_async_context(WebSocketClient(uri))
 
         # 初始化任务管理器
-        self.task_manager = TaskManager(self.event_adapter)
+        self.task_manager = TaskManager(self.event_adapter, self.event_parser)
 
         # 加载插件
         await self._load_plugins()
