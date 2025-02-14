@@ -9,37 +9,28 @@ from pero.utils.config import config
 from pero.utils.logger import logger
 
 
-@plugin(
-    name="kimi_chat", version="1.0", dependencies=[]  # 如果有依赖其他插件，在这里添加
-)
-class KimiChatPlugin(PluginBase):
-    def __init__(self):
-        self.client = None
-        self.api_key = None
+class BaseChatPlugin(PluginBase):
+    def __init__(self, api_base_url: str, api_key: str):
+        self.client = OpenAI(api_key=api_key, base_url=api_base_url)
+        self.api_key = api_key
 
     def on_load(self):
         """插件加载时初始化OpenAI客户端"""
-        self.api_key = config.kimi_api
-        self.client = OpenAI(
-            api_key=self.api_key,
-            base_url="https://api.moonshot.cn/v1",
-        )
-        logger.info("KimiChat plugin loaded successfully")
+        logger.info(f"{self.__class__.__name__} plugin loaded successfully")
 
     def on_unload(self):
         """插件卸载时清理资源"""
         self.client = None
-        logger.info("KimiChat plugin unloaded")
+        logger.info(f"{self.__class__.__name__} plugin unloaded")
 
-    @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
     async def chat(self, event: Dict):
         """处理群消息"""
         try:
             # 获取任务追踪器
-            task = plugin_manager.track_task("kimi_chat")
+            task = plugin_manager.track_task(self.__class__.__name__)
 
             try:
-                logger.info(f"kimi收到消息: {event}")
+                logger.info(f"收到消息: {event}")
                 # 提取文本消息
                 text = self._extract_text(event)
                 if not text:
@@ -47,18 +38,18 @@ class KimiChatPlugin(PluginBase):
 
                 # 调用API获取回复
                 result = await self._get_chat_response(text)
-                logger.info(f"kimi回复消息{result}")
+                logger.info(f"回复消息: {result}")
 
                 # 发送群消息
-                return await PERO_API.post_group_msg(
-                    group_id=event.get("target"), text=result, reply=event.get("reply")
+                return await PERO_API.post_msg(
+                    event, text=result, reply=event.get("reply")
                 )
             finally:
                 # 标记任务完成
                 plugin_manager.complete_task(task)
 
         except Exception as e:
-            logger.error(f"Error in KimiChat plugin: {e}")
+            logger.error(f"Error in {self.__class__.__name__} plugin: {e}")
             raise
 
     def _extract_text(self, event: Dict) -> str:
@@ -82,3 +73,18 @@ class KimiChatPlugin(PluginBase):
             temperature=0.3,
         )
         return completion.choices[0].message.content
+
+
+@plugin(
+    name="kimi_chat", version="1.0", dependencies=[]  # 如果有依赖其他插件，在这里添加
+)
+class KimiChatPlugin(BaseChatPlugin):
+    def __init__(self):
+        super().__init__(
+            api_base_url="https://api.moonshot.cn/v1", api_key=config.kimi_api
+        )
+
+    @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
+    # @MessageAdapter.register("private", ["text"], "kimi_chat")
+    async def chat(self, event: Dict):
+        return await super().chat(event)

@@ -68,5 +68,5 @@ class EventAdapter:
 
 # Example: Registering a handler for status events
 @EventAdapter.register_handler("status", "ok")
-async def handle_friend_status(event: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_status(event: Dict[str, Any]) -> Dict[str, Any]:
     logger.info(f"napcat回应状态: {event}")
