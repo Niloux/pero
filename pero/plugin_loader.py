@@ -43,10 +43,27 @@ class PluginReloader:
         for name in list(sys.modules.keys()):
             if name.startswith(f"{plugin_dir}."):
                 try:
+                    module = sys.modules[name]
+                    # 这里假设每个插件都有一个 `deregister` 方法用于清理注册的函数
+                    if hasattr(module, "deregister"):
+                        module.deregister()
                     del sys.modules[name]  # 卸载插件模块
                     logger.info(f"已卸载插件模块: {name}")
                 except KeyError:
                     logger.warning(f"插件模块 {name} 卸载失败")
+                except Exception as e:
+                    logger.error(f"卸载插件模块 {name} 时出错: {e}")
+
+        # 确保重新加载父模块
+        parent_modules = set(
+            module_name.rsplit(".", 1)[0]
+            for module_name in list(sys.modules.keys())
+            if module_name.startswith(f"{plugin_dir}.")
+        )
+        for parent_module in parent_modules:
+            if parent_module in sys.modules:
+                del sys.modules[parent_module]
+                logger.info(f"已卸载父插件模块: {parent_module}")
 
         # 重新加载插件
         if str(current_dir) not in sys.path:
@@ -54,7 +71,11 @@ class PluginReloader:
 
         for module_file in plugin_path.glob("*/handler.py"):
             module_name = f"{plugin_dir}.{module_file.parent.name}.handler"
+            parent_module_name = f"{plugin_dir}.{module_file.parent.name}"
             try:
+                # 确保父模块被加载
+                if parent_module_name not in sys.modules:
+                    importlib.import_module(parent_module_name)
                 module = importlib.import_module(module_name)
                 importlib.reload(module)  # 强制重新加载模块
                 reloaded_plugins.append(module_file.parent.name)

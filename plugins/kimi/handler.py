@@ -14,8 +14,22 @@ client = OpenAI(
     base_url="https://api.moonshot.cn/v1",
 )
 
+registered_handlers = []
 
-@MessageAdapter.register("group", ["text", "at"])
+
+def register():
+    handler = MessageAdapter.register("group", ["text", "at"])(kimi_text)
+    registered_handlers.append(handler)
+    logger.info("注册了kimi插件的处理程序")
+
+
+def deregister():
+    for handler in registered_handlers:
+        MessageAdapter.handlers["group"][("text", "at")].remove(handler)
+    registered_handlers.clear()
+    logger.info("取消注册了kimi插件的处理程序")
+
+
 async def kimi_text(event: Dict):
     # 找出text消息
     logger.info(f"kimi收到消息: {event}")
@@ -40,3 +54,7 @@ async def kimi_text(event: Dict):
     return await PERO_API.post_group_msg(
         group_id=event.get("target"), text=result, reply=event.get("reply")
     )
+
+
+# 自动注册处理程序
+register()
