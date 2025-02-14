@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-from pero.element import (
+from pero.utils.element import (
     At,
     CustomMusic,
     Dice,
@@ -16,7 +16,7 @@ from pero.element import (
     Text,
     Video,
 )
-from pero.status import Status
+from pero.utils.status import Status
 
 
 class API:
@@ -28,10 +28,7 @@ class API:
                     return message["data"]["text"]
 
                 if message["type"] == "image":
-                    if (
-                        "summary" in message["data"]
-                        and message["data"]["summary"] != ""
-                    ):
+                    if "summary" in message["data"] and message["data"]["summary"] != "":
                         return message["data"]["summary"]
                     return "[图片]"
 
@@ -57,9 +54,7 @@ class API:
                 },
             }
             message_content.append(node)
-            news.append(
-                {"text": report["sender"]["nickname"] + ": " + decode_summary(report)}
-            )
+            news.append({"text": report["sender"]["nickname"] + ": " + decode_summary(report)})
 
         if len(news) > 4:
             news = news[:4]
@@ -67,9 +62,7 @@ class API:
         if report["message_type"] == "group":
             target = "群聊"
         else:
-            participants = list(
-                set([record["sender"]["nickname"] for record in reports])
-            )
+            participants = list(set([record["sender"]["nickname"] for record in reports]))
             if len(participants) == 1:
                 target = participants[0]
             else:
@@ -260,9 +253,7 @@ class API:
         return ("/get_mini_app_ark", app_json)
 
     # TODO: 消息接口
-    async def mark_msg_as_read(
-        self, group_id: Union[int, str] = None, user_id: Union[int, str] = None
-    ):
+    async def mark_msg_as_read(self, group_id: Union[int, str] = None, user_id: Union[int, str] = None):
         """
         :param group_id: 群号,二选一
         :param user_id: QQ号,二选一
@@ -353,9 +344,7 @@ class API:
             },
         )
 
-    async def set_msg_emoji_like(
-        self, message_id: Union[int, str], emoji_id: int, emoji_set: bool
-    ):
+    async def set_msg_emoji_like(self, message_id: Union[int, str], emoji_id: int, emoji_set: bool):
         """
         :param message_id: 消息ID
         :param emoji_id: 表情ID
@@ -469,9 +458,7 @@ class API:
         """
         return ("/get_forward_msg", {"message_id": message_id})
 
-    async def send_poke(
-        self, user_id: Union[int, str], group_id: Union[int, str] = None
-    ):
+    async def send_poke(self, user_id: Union[int, str], group_id: Union[int, str] = None):
         """
         :param user_id: QQ号
         :param group_id: 群号,可选，不填则为私聊
@@ -482,9 +469,7 @@ class API:
         else:
             return ("/send_poke", {"user_id": user_id})
 
-    async def forward_friend_single_msg(
-        self, message_id: str, user_id: Union[int, str]
-    ):
+    async def forward_friend_single_msg(self, message_id: str, user_id: Union[int, str]):
         """
         :param message_id: 消息ID
         :param user_id: 发送对象QQ号
@@ -495,9 +480,7 @@ class API:
             {"user_id": user_id, "message_id": message_id},
         )
 
-    async def send_private_forward_msg(
-        self, user_id: Union[int, str], messages: list[str]
-    ):
+    async def send_private_forward_msg(self, user_id: Union[int, str], messages: list[str]):
         """
         :param user_id: 发送对象QQ号
         :param messages: 消息列表
@@ -529,9 +512,7 @@ class API:
             },
         )
 
-    async def set_group_ban(
-        self, group_id: Union[int, str], user_id: Union[int, str], duration: int
-    ):
+    async def set_group_ban(self, group_id: Union[int, str], user_id: Union[int, str], duration: int):
         """
         :param group_id: 群号
         :param user_id: QQ号
@@ -573,9 +554,7 @@ class API:
         """
         return ("/set_group_portrait", {"group_id": group_id, "file": file})
 
-    async def set_group_admin(
-        self, group_id: Union[int, str], user_id: Union[int, str], enable: bool
-    ):
+    async def set_group_admin(self, group_id: Union[int, str], user_id: Union[int, str], enable: bool):
         """
         :param group_id: 群号
         :param user_id: QQ号
@@ -594,9 +573,7 @@ class API:
         """
         return ("/set_essence_msg", {"message_id": message_id})
 
-    async def set_group_card(
-        self, group_id: Union[int, str], user_id: Union[int, str], card: str
-    ):
+    async def set_group_card(self, group_id: Union[int, str], user_id: Union[int, str], card: str):
         """
         :param group_id: 群号
         :param user_id: QQ号
@@ -633,9 +610,7 @@ class API:
         """
         return ("/set_group_leave", {"group_id": group_id})
 
-    async def send_group_notice(
-        self, group_id: Union[int, str], content: str, image: str = None
-    ):
+    async def send_group_notice(self, group_id: Union[int, str], content: str, image: str = None):
         """
         :param group_id: 群号
         :param content: 内容
@@ -660,9 +635,7 @@ class API:
         """
         return ("/_get_group_notice", {"group_id": group_id})
 
-    async def set_group_special_title(
-        self, group_id: Union[int, str], user_id: Union[int, str], special_title: str
-    ):
+    async def set_group_special_title(self, group_id: Union[int, str], user_id: Union[int, str], special_title: str):
         """
         :param group_id: 群号
         :param user_id: QQ号
@@ -674,9 +647,7 @@ class API:
             {"group_id": group_id, "user_id": user_id, "special_title": special_title},
         )
 
-    async def upload_group_file(
-        self, group_id: Union[int, str], file: str, name: str, folder_id: str
-    ):
+    async def upload_group_file(self, group_id: Union[int, str], file: str, name: str, folder_id: str):
         """
         :param group_id: 群号
         :param file: 文件路径
@@ -718,9 +689,7 @@ class API:
         """
         return ("/get_group_info_ex", {"group_id": group_id})
 
-    async def create_group_file_folder(
-        self, group_id: Union[int, str], folder_name: str
-    ):
+    async def create_group_file_folder(self, group_id: Union[int, str], folder_name: str):
         """
         :param group_id: 群号
         :param folder_name: 文件夹名
@@ -764,9 +733,7 @@ class API:
         """
         return ("/get_group_root_files", {"group_id": group_id})
 
-    async def get_group_files_by_folder(
-        self, group_id: Union[int, str], folder_id: str, file_count: int
-    ):
+    async def get_group_files_by_folder(self, group_id: Union[int, str], folder_id: str, file_count: int):
         """
         :param group_id: 群号
         :param folder_id: 文件夹ID
@@ -793,9 +760,7 @@ class API:
         """
         return ("/get_group_list", {"no_cache": no_cache})
 
-    async def get_group_member_info(
-        self, group_id: Union[int, str], user_id: Union[int, str], no_cache: bool
-    ):
+    async def get_group_member_info(self, group_id: Union[int, str], user_id: Union[int, str], no_cache: bool):
         """
         :param group_id: 群号
         :param user_id: QQ号
@@ -807,9 +772,7 @@ class API:
             {"group_id": group_id, "user_id": user_id, "no_cache": no_cache},
         )
 
-    async def get_group_member_list(
-        self, group_id: Union[int, str], no_cache: bool = False
-    ):
+    async def get_group_member_list(self, group_id: Union[int, str], no_cache: bool = False):
         """
         :param group_id: 群号
         :param no_cache: 不缓存
@@ -855,9 +818,7 @@ class API:
         """
         return ("/send_group_sign", {"group_id": group_id})
 
-    async def get_ai_characters(
-        self, group_id: Union[int, str], chat_type: Union[int, str]
-    ):
+    async def get_ai_characters(self, group_id: Union[int, str], chat_type: Union[int, str]):
         """
         :param group_id: 群号
         :param chat_type: 聊天类型
@@ -868,9 +829,7 @@ class API:
             {"group_id": group_id, "chat_type": chat_type},
         )
 
-    async def send_group_ai_record(
-        self, group_id: Union[int, str], character: str, text: str
-    ):
+    async def send_group_ai_record(self, group_id: Union[int, str], character: str, text: str):
         """
         :param group_id: 群号
         :param character: AI语音人物,即character_id
@@ -894,9 +853,7 @@ class API:
             {"group_id": group_id, "character": character, "text": text},
         )
 
-    async def forward_group_single_msg(
-        self, message_id: str, group_id: Union[int, str]
-    ):
+    async def forward_group_single_msg(self, message_id: str, group_id: Union[int, str]):
         """
         :param message_id: 消息ID
         :param group_id: 群号
@@ -907,9 +864,7 @@ class API:
             {"group_id": group_id, "message_id": message_id},
         )
 
-    async def send_group_forward_msg(
-        self, group_id: Union[int, str], messages: list[str]
-    ):
+    async def send_group_forward_msg(self, group_id: Union[int, str], messages: list[str]):
         """
         :param group_id: 群号
         :param messages: 消息列表
@@ -1195,9 +1150,7 @@ class API:
                 message.extend(basic_elems)
             else:
                 # 如果没有基本元素，才使用所有非reply元素
-                message.extend(
-                    [elem for elem in rtf.elements if elem["type"] != "reply"]
-                )
+                message.extend([elem for elem in rtf.elements if elem["type"] != "reply"])
         if not message:
             return {"code": 0, "msg": "消息不能为空"}
         params = {"group_id": group_id, "message": message}

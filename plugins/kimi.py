@@ -2,9 +2,9 @@ from typing import Dict
 
 from openai import OpenAI
 
-from pero.api import PERO_API
 from pero.message_adapter import MessageAdapter
-from pero.plugin_system import PluginBase, plugin, plugin_manager
+from pero.plugin_system.plugin_manager import PluginBase, plugin, plugin_manager
+from pero.utils.api import PERO_API
 from pero.utils.config import config
 from pero.utils.logger import logger
 
@@ -41,9 +41,7 @@ class BaseChatPlugin(PluginBase):
                 logger.info(f"回复消息: {result}")
 
                 # 发送群消息
-                return await PERO_API.post_msg(
-                    event, text=result, reply=event.get("reply")
-                )
+                return await PERO_API.post_msg(event, text=result, reply=event.get("reply"))
             finally:
                 # 标记任务完成
                 plugin_manager.complete_task(task)
@@ -75,14 +73,10 @@ class BaseChatPlugin(PluginBase):
         return completion.choices[0].message.content
 
 
-@plugin(
-    name="kimi_chat", version="1.0", dependencies=[]  # 如果有依赖其他插件，在这里添加
-)
+@plugin(name="kimi_chat", version="1.0", dependencies=[])  # 如果有依赖其他插件，在这里添加
 class KimiChatPlugin(BaseChatPlugin):
     def __init__(self):
-        super().__init__(
-            api_base_url="https://api.moonshot.cn/v1", api_key=config.kimi_api
-        )
+        super().__init__(api_base_url="https://api.moonshot.cn/v1", api_key=config.kimi_api)
 
     @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
     # @MessageAdapter.register("private", ["text"], "kimi_chat")

@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 
-from pero.plugin_base import PluginBase
+from pero.plugin_system.plugin_base import PluginBase
 from pero.utils.hybrid_lock import HybridLock
 from pero.utils.logger import logger
 
@@ -146,11 +146,7 @@ class PluginManager:
         """等待指定插件的所有任务完成"""
         while True:
             async with self._tasks_lock:
-                active_tasks = {
-                    task
-                    for task in self._active_tasks
-                    if task.plugin_name == plugin_name
-                }
+                active_tasks = {task for task in self._active_tasks if task.plugin_name == plugin_name}
                 if not active_tasks:
                     break
             # 等待所有任务的完成事件
@@ -180,14 +176,10 @@ class PluginManager:
             async with self._tasks_lock:
                 active_tasks = list(self._active_tasks)
                 if active_tasks:
-                    logger.info(
-                        f"Waiting for {len(active_tasks)} active tasks to complete..."
-                    )
+                    logger.info(f"Waiting for {len(active_tasks)} active tasks to complete...")
                     for task in active_tasks:
                         await asyncio.wait_for(
-                            asyncio.wrap_future(
-                                self._executor.submit(task.completed.wait)
-                            ),
+                            asyncio.wrap_future(self._executor.submit(task.completed.wait)),
                             timeout=5.0,
                         )
 
@@ -224,9 +216,7 @@ class PluginManager:
                 def on_modified(self, event):
                     if event.src_path.endswith(".py"):
                         logger.info(f"Detected changes in {event.src_path}")
-                        module_name = os.path.splitext(
-                            os.path.basename(event.src_path)
-                        )[0]
+                        module_name = os.path.splitext(os.path.basename(event.src_path))[0]
                         plugin_manager._reload_module(module_name)
 
             observer = watchdog.observers.Observer()
@@ -246,11 +236,7 @@ class PluginManager:
 
             # 重新加载模块中的所有插件
             for item_name, item in inspect.getmembers(module):
-                if (
-                    inspect.isclass(item)
-                    and hasattr(item, "_is_plugin")
-                    and item._meta.name in self._plugins
-                ):
+                if inspect.isclass(item) and hasattr(item, "_is_plugin") and item._meta.name in self._plugins:
                     asyncio.run(self.reload_plugin(item._meta.name))
 
         except Exception as e:
@@ -295,9 +281,7 @@ class PluginManager:
                 old_instance.on_unload()
 
             # 重新加载插件
-            importlib.reload(
-                importlib.import_module(self._plugin_meta[plugin_name].module_path)
-            )
+            importlib.reload(importlib.import_module(self._plugin_meta[plugin_name].module_path))
             self._load_plugin(plugin_name)
 
 

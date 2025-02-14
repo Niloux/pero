@@ -240,9 +240,7 @@ class CustomMusic(Element):
 
     type = "music"
 
-    def __init__(
-        self, url: str, audio: str, title: str, image: str = "", singer: str = ""
-    ):
+    def __init__(self, url: str, audio: str, title: str, image: str = "", singer: str = ""):
         self.url = url
         self.audio = audio
         self.title = title

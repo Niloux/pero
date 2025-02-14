@@ -5,7 +5,7 @@ from typing import Optional, Set
 
 from pero.cmd.command_manager import command_manager
 from pero.event_adapter import EventAdapter
-from pero.plugin_system import plugin_manager
+from pero.plugin_system.plugin_manager import plugin_manager
 from pero.task_manager import TaskManager
 from pero.utils.config import config
 from pero.utils.logger import logger
@@ -61,7 +61,7 @@ class Application:
     async def _load_plugins(self):
         """加载插件"""
         try:
-            plugin_dir = config.get("plugin_dir", "pero/plugins")
+            plugin_dir = config.get("plugin_dir", "plugins")
             self.plugin_manager.add_plugin_dir(plugin_dir)
             self.plugin_manager.discover_plugins()
             self.plugin_manager.load_plugins()
@@ -85,9 +85,7 @@ class Application:
     def _create_tasks(self) -> Set[asyncio.Task]:
         """创建需要运行的异步任务"""
         tasks = {
-            asyncio.create_task(
-                self.websocket.receive_messages(), name="websocket_receive"
-            ),
+            asyncio.create_task(self.websocket.receive_messages(), name="websocket_receive"),
             asyncio.create_task(self.websocket.post_messages(), name="websocket_post"),
             asyncio.create_task(self.task_manager.start(), name="task_manager"),
         }
@@ -127,9 +125,7 @@ class Application:
             # 设置信号处理
             loop = asyncio.get_running_loop()
             for sig in (signal.SIGTERM, signal.SIGINT):
-                loop.add_signal_handler(
-                    sig, lambda s=sig: asyncio.create_task(self._handle_signal(s))
-                )
+                loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(self._handle_signal(s)))
 
             # 创建并运行任务
             tasks = self._create_tasks()

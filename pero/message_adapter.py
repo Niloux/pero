@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pero.cmd.command_manager import command_manager
-from pero.plugin_system import plugin_manager
+from pero.plugin_system.plugin_manager import plugin_manager
 from pero.utils.logger import logger
 
 
@@ -13,25 +13,19 @@ class MessageAdapter:
     }
 
     @classmethod
-    def register(
-        cls, source_type: str, message_types: List[str], plugin_name: str
-    ) -> Callable:
+    def register(cls, source_type: str, message_types: List[str], plugin_name: str) -> Callable:
         def decorator(handler: Callable) -> Callable:
             key = tuple(sorted(message_types))
             if key not in cls.handlers[source_type]:
                 cls.handlers[source_type][key] = []
             cls.handlers[source_type][key].append((plugin_name, handler))
-            logger.info(
-                f"Registered {source_type} message handler for types: {message_types} by plugin: {plugin_name}"
-            )
+            logger.info(f"Registered {source_type} message handler for types: {message_types} by plugin: {plugin_name}")
             return handler
 
         return decorator
 
     @classmethod
-    async def handle_event(
-        cls, event: Dict[str, Any]
-    ) -> List[Union[Tuple[str, Dict], None]]:
+    async def handle_event(cls, event: Dict[str, Any]) -> List[Union[Tuple[str, Dict], None]]:
         source_type: str = event.get("source_type", "")
         event_types: Any = event.get("message_type", [])
         results: List[Union[Tuple[str, Dict], None]] = []
@@ -42,9 +36,7 @@ class MessageAdapter:
             event_types = [event_types]
 
         key: Tuple[str] = tuple(event_types)
-        handlers: List[Tuple[str, Callable]] = cls.handlers.get(source_type, {}).get(
-            key, []
-        )
+        handlers: List[Tuple[str, Callable]] = cls.handlers.get(source_type, {}).get(key, [])
 
         # 插件消息任务
         for plugin_name, handler in handlers:
@@ -81,7 +73,5 @@ class MessageAdapter:
             and isinstance(result[1], dict)
         ):
             return result
-        logger.warning(
-            f"Unexpected result type: {type(result)}. Expected (str, dict) or None."
-        )
+        logger.warning(f"Unexpected result type: {type(result)}. Expected (str, dict) or None.")
         return None

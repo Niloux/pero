@@ -2,8 +2,8 @@ import importlib.util
 import os
 from typing import Any, Dict, Tuple
 
-from pero.api import PERO_API
 from pero.cmd.command_parser import CommandParser
+from pero.utils.api import PERO_API
 from pero.utils.logger import logger
 
 
@@ -61,13 +61,9 @@ class CommandManager:
     async def _send_response(self, event: Dict, message: str) -> Tuple[str, Dict]:
         """根据event中的类型发送回复"""
         if event.get("source_type") == "private":
-            return await PERO_API.post_private_msg(
-                user_id=event.get("target"), text=message
-            )
+            return await PERO_API.post_private_msg(user_id=event.get("target"), text=message)
         elif event.get("source_type") == "group":
-            return await PERO_API.post_group_msg(
-                group_id=event.get("target"), text=message
-            )
+            return await PERO_API.post_group_msg(group_id=event.get("target"), text=message)
 
 
 # 创建 CommandManager 实例
