@@ -38,14 +38,10 @@ class EventAdapter:
             if isinstance(event_type, list):
                 for type in event_type:
                     handlers = cls.handlers[handler_type].get(type, [])
-                    results.extend(
-                        await asyncio.gather(*[handler(event) for handler in handlers])
-                    )
+                    results.extend(await asyncio.gather(*[handler(event) for handler in handlers]))
             else:
                 handlers = cls.handlers[handler_type].get(event_type, [])
-                results.extend(
-                    await asyncio.gather(*[handler(event) for handler in handlers])
-                )
+                results.extend(await asyncio.gather(*[handler(event) for handler in handlers]))
 
         return results
 

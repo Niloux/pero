@@ -73,9 +73,7 @@ class EventParser:
         sender_type = event.get("sub_type")  # "friend" 或 "other"
 
         # 提取消息类型列表
-        message_types = [
-            msg.get("type") for msg in event.get("message", []) if msg.get("type")
-        ]
+        message_types = [msg.get("type") for msg in event.get("message", []) if msg.get("type")]
 
         # 提取消息内容
         content = event.get("message", [])

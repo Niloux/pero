@@ -4,7 +4,7 @@ from contextlib import AsyncExitStack
 from typing import Optional, Set
 
 from pero.cmd.command_manager import command_manager
-from pero.event_adapter import EventAdapter
+from pero.dispatcher import EventAdapter
 from pero.plugin_system.plugin_manager import plugin_manager
 from pero.task_manager import TaskManager
 from pero.utils.config import config

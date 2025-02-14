@@ -1,8 +1,8 @@
 import asyncio
 from typing import Any, Dict
 
-from pero.event_adapter import EventAdapter
-from pero.event_parser import EventParser
+from pero.dispatcher import EventAdapter
+from pero.parser import EventParser
 from pero.utils.logger import logger
 from pero.utils.queue import post_queue, recv_queue
 
