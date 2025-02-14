@@ -1,7 +1,7 @@
 import asyncio
 import signal
 from contextlib import AsyncExitStack
-from typing import Optional, Set
+from typing import Optional
 
 from pero.cmd.command_manager import command_manager
 from pero.core.dispatcher import EventHandler
@@ -23,8 +23,8 @@ class Application:
         self.event_parser = EventParser()
         self.task_manager: Optional[TaskManager] = None
         self.websocket: Optional[WebSocketClient] = None
-        self.running_tasks: Set[asyncio.Task] = set()
         self.exit_stack = AsyncExitStack()
+        self.main_task: Optional[asyncio.Task] = None
 
     async def initialize(self):
         """初始化应用程序组件"""
@@ -84,31 +84,13 @@ class Application:
             logger.error(f"Failed to load commands: {e}")
             raise
 
-    def _create_tasks(self) -> Set[asyncio.Task]:
-        """创建需要运行的异步任务"""
-        tasks = {
-            asyncio.create_task(self.websocket.receive_messages(), name="websocket_receive"),
-            asyncio.create_task(self.websocket.post_messages(), name="websocket_post"),
-            asyncio.create_task(self.task_manager.start(), name="task_manager"),
-        }
-
-        for task in tasks:
-            task.add_done_callback(self.running_tasks.remove)
-            self.running_tasks.add(task)
-
-        return tasks
-
     async def _shutdown(self):
         """优雅关闭应用程序"""
         logger.info("Shutting down application...")
 
-        # 取消所有运行中的任务
-        for task in self.running_tasks:
-            task.cancel()
-
-        # 等待任务完成
-        if self.running_tasks:
-            await asyncio.gather(*self.running_tasks, return_exceptions=True)
+        # 关闭任务
+        if self.task_manager:
+            await self.task_manager.shutdown()
 
         # 关闭插件管理器
         await self.plugin_manager.shutdown()
@@ -129,9 +111,9 @@ class Application:
             for sig in (signal.SIGTERM, signal.SIGINT):
                 loop.add_signal_handler(sig, lambda s=sig: asyncio.create_task(self._handle_signal(s)))
 
-            # 创建并运行任务
-            tasks = self._create_tasks()
-            await asyncio.gather(*tasks)
+            # 运行任务
+            self.main_task = asyncio.create_task(self.task_manager.start())
+            await self.main_task
 
         except asyncio.CancelledError:
             logger.info("Application cancelled")
@@ -144,4 +126,6 @@ class Application:
     async def _handle_signal(self, sig: signal.Signals):
         """处理系统信号"""
         logger.info(f"Received signal: {sig.name}")
+        if self.main_task:
+            self.main_task.cancel()
         await self._shutdown()

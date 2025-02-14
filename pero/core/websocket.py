@@ -10,12 +10,14 @@ from pero.utils.queue import post_queue, recv_queue
 
 
 class WebSocketClient:
-    def __init__(self, uri: str):
+    def __init__(self, uri: str, retry_interval: int = 5):
         self.uri = uri
         self.websocket = None
         self.is_connected = False
         self.send_lock = asyncio.Lock()
         self.receive_lock = asyncio.Lock()
+        self.retry_interval = retry_interval
+        self.heartbeat_interval = 30
 
     async def __aenter__(self):
         """进入异步上下文管理器"""
@@ -28,15 +30,33 @@ class WebSocketClient:
 
     async def connect(self):
         """建立 WebSocket 连接"""
-        try:
-            self.websocket = await websockets.connect(self.uri)
-            self.is_connected = True
-            logger.info(f"Connected to {self.uri}")
+        while not self.is_connected:
+            try:
+                self.websocket = await websockets.connect(self.uri)
+                self.is_connected = True
+                logger.info(f"Connected to {self.uri}")
 
-            await self._handle_lifecycle_event()
-        except Exception as e:
-            logger.error(f"Failed to connect to {self.uri}: {e}")
-            self.is_connected = False
+                await self._handle_lifecycle_event()
+                asyncio.create_task(self._send_heartbeat())
+
+                self.receive_task = asyncio.create_task(self._receive_messages())
+                self.post_task = asyncio.create_task(self._post_messages())
+
+            except Exception as e:
+                logger.error(f"Failed to connect to {self.uri}: {e}")
+                self.is_connected = False
+                await asyncio.sleep(self.retry_interval)
+
+    async def _send_heartbeat(self):
+        """发送心跳消息"""
+        while self.is_connected:
+            try:
+                heartbeat_message = json.dumps({"type": "heartbeat"})
+                await self.send(heartbeat_message)
+                await asyncio.sleep(self.heartbeat_interval)
+            except Exception as e:
+                logger.error(f"Error sending heartbeat: {e}")
+                self.is_connected = False
 
     async def _handle_lifecycle_event(self):
         """处理生命周期事件"""
@@ -45,9 +65,6 @@ class WebSocketClient:
 
         response = await self.websocket.recv()
         logger.debug(f"Received Lifecycle Event: {response}")
-
-        # 在这里可以处理连接建立后的其他生命周期事件
-        # 如：验证连接是否成功、获取认证信息等
 
     async def send(self, msg: Dict[str, str]):
         """发送消息到 WebSocket 服务端"""
@@ -105,7 +122,6 @@ class WebSocketClient:
         Args:
             action (str): 请求的动作类型。
             params (dict, optional): 请求的参数。默认为 None。
-            json (dict, optional): 请求的 JSON 数据。默认为 None。
 
         Returns:
             None
@@ -131,7 +147,7 @@ class WebSocketClient:
             logger.error(f"Error sending message: {e}")
             raise e
 
-    async def receive_messages(self):
+    async def _receive_messages(self):
         """不断接收 WebSocket 消息并放入 recv_queue"""
         while self.is_connected:
             try:
@@ -141,7 +157,7 @@ class WebSocketClient:
             except Exception as e:
                 logger.error(f"Error receiving message: {e}")
 
-    async def post_messages(self):
+    async def _post_messages(self):
         """不断从 post_queue 中取出消息并进行 post"""
         while self.is_connected:
             try:

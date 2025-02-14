@@ -15,7 +15,7 @@ class EventHandler:
     }
 
     @classmethod
-    def register_handler(cls, handler_type: str, event_type: str):
+    def register(cls, handler_type: str, event_type: str):
         def decorator(handler: Callable):
             if event_type not in cls.handlers[handler_type]:
                 cls.handlers[handler_type][event_type] = []
@@ -63,6 +63,6 @@ class EventHandler:
 
 
 # Example: Registering a handler for status events
-@EventHandler.register_handler("status", "ok")
+@EventHandler.register("status", "ok")
 async def handle_status(event: Dict[str, Any]) -> Dict[str, Any]:
     logger.info(f"napcat回应状态: {event}")
