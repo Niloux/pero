@@ -33,10 +33,6 @@ class WebSocketClient:
             self.is_connected = True
             logger.info(f"Connected to {self.uri}")
 
-            # 启动处理接收和发送消息的任务
-            self.receive_task = asyncio.create_task(self._receive_messages())
-            self.post_task = asyncio.create_task(self._post_messages())
-
             await self._handle_lifecycle_event()
         except Exception as e:
             logger.error(f"Failed to connect to {self.uri}: {e}")
@@ -135,7 +131,7 @@ class WebSocketClient:
             logger.error(f"Error sending message: {e}")
             raise e
 
-    async def _receive_messages(self):
+    async def receive_messages(self):
         """不断接收 WebSocket 消息并放入 recv_queue"""
         while self.is_connected:
             try:
@@ -145,7 +141,7 @@ class WebSocketClient:
             except Exception as e:
                 logger.error(f"Error receiving message: {e}")
 
-    async def _post_messages(self):
+    async def post_messages(self):
         """不断从 post_queue 中取出消息并进行 post"""
         while self.is_connected:
             try:

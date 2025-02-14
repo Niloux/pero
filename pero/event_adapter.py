@@ -34,6 +34,7 @@ class EventAdapter:
         if handler_type == "message":
             results.extend(await MessageAdapter.handle_event(event))
         else:
+            # TODO后续根据事件的需要可能会增添meta_event_adapter, notice_adapter, request_adapter等
             if isinstance(event_type, list):
                 for type in event_type:
                     handlers = cls.handlers[handler_type].get(type, [])
