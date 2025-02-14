@@ -3,7 +3,7 @@ from typing import Dict
 from openai import OpenAI
 
 from pero.core.message_adapter import MessageAdapter
-from pero.plugin_system.plugin_manager import PluginBase, plugin, plugin_manager
+from pero.plugin.plugin_manager import PluginBase, plugin, plugin_manager
 from pero.utils.api import PERO_API
 from pero.utils.config import config
 from pero.utils.logger import logger

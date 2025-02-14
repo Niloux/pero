@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pero.cmd.command_manager import command_manager
-from pero.plugin_system.plugin_manager import plugin_manager
+from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.logger import logger
 
 

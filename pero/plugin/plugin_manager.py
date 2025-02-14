@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Set
 
-from pero.plugin_system.plugin_base import PluginBase
+from pero.plugin.plugin_base import PluginBase
 from pero.utils.hybrid_lock import HybridLock
 from pero.utils.logger import logger
 

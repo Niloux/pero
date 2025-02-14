@@ -8,7 +8,7 @@ from pero.core.dispatcher import EventHandler
 from pero.core.event_parser import EventParser
 from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
-from pero.plugin_system.plugin_manager import plugin_manager
+from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.config import config
 from pero.utils.logger import logger
 

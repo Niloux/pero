@@ -1,10 +1,12 @@
-class Command:
-    """命令基类"""
+from pero.cmd.command_registry import CommandRegistry
 
-    def __init__(self, command: str, text: str):
-        self.command = command
+
+class BaseCommand(metaclass=CommandRegistry):
+    command_name = None
+
+    def __init__(self, name, text):
+        self.name = name
         self.text = text
 
-    async def execute(self) -> str:
-        """命令执行的具体实现"""
-        raise NotImplementedError
+    async def execute(self):
+        raise NotImplementedError("Subclasses must implement this method")
