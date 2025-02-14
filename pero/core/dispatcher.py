@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Callable, Dict, List
 
-from pero.message_adapter import MessageAdapter
+from pero.core.message_adapter import MessageAdapter
 from pero.utils.logger import logger
 
 
