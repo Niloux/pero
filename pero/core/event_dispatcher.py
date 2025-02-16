@@ -32,7 +32,7 @@ class EventHandler:
         results = []
 
         if handler_type == "message":
-            results.extend(await MessageAdapter.handle_event(event))
+            results.extend(await MessageAdapter.handle_message(event))
         else:
             # TODO后续根据事件的需要可能会增添meta_event_adapter, notice_adapter, request_adapter等
             if isinstance(event_type, list):

@@ -25,7 +25,8 @@ class MessageAdapter:
         return decorator
 
     @classmethod
-    async def handle_event(cls, event: Dict[str, Any]) -> List[Union[Tuple[str, Dict], None]]:
+    async def handle_message(cls, event: Dict[str, Any]) -> List[Union[Tuple[str, Dict], None]]:
+        # TODO:需要一个正儿八经的message_parser解析层去解析message内容是cmd还是插件，或者思考一下现在的划分是否合理。
         source_type: str = event.get("source_type", "")
         event_types: Any = event.get("message_type", [])
         results: List[Union[Tuple[str, Dict], None]] = []

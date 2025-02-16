@@ -4,7 +4,7 @@ from contextlib import AsyncExitStack
 from typing import Optional
 
 from pero.cmd.command_manager import command_manager
-from pero.core.dispatcher import EventHandler
+from pero.core.event_dispatcher import EventHandler
 from pero.core.event_parser import EventParser
 from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
