@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, Tuple
 
 from pero.cmd.command_parser import CommandParser
-from pero.utils.api import PERO_API
+from pero.core.api import PERO_API
 from pero.utils.logger import logger
 
 

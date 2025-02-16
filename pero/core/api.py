@@ -1,6 +1,6 @@
 from typing import Dict, Union
 
-from pero.utils.element import (
+from pero.core.element import (
     At,
     CustomMusic,
     Dice,
@@ -16,7 +16,7 @@ from pero.utils.element import (
     Text,
     Video,
 )
-from pero.utils.status import Status
+from pero.core.status import Status
 
 
 class API:
