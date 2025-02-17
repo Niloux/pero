@@ -33,6 +33,7 @@ class MessageAdapter:
 
         # cmd指令
         if message.command:
+            logger.info("Handling command...")
             try:
                 cmd_results = await asyncio.gather(
                     command_manager.execute(message),
@@ -42,6 +43,8 @@ class MessageAdapter:
                 logger.error(f"Error executing command manager: {e}")
 
         else:
+            logger.info("No command found, handling with plugins...")
+
             # 插件任务
             key: Tuple[str] = tuple(message.types)
             handlers: List[Tuple[str, Callable]] = cls.handlers.get(message.source, {}).get(key, [])

@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from pero.cmd.command_parser import Command, CommandParser
 from pero.core.message import At, Image, MessageElement, Text
-from pero.utils.logger import logger
 
 
 class Message:
@@ -60,13 +59,10 @@ class MessageParser:
         message.reply = event.get("reply")
         message.target = event.get("target")
         # 解析指令
-        logger.info(f"{message}")
-        logger.info(f"{message.types}")
-        logger.info(f"{message.get_text()}")
         if "text" in message.types and message.get_text():
-            logger.info("GETIN!!!!!!!!!")
+            # 当content中有多条内容时，比如@机器人 + 指令，此时不会被解析为指令
+            # 本来以为出现了bug，后来才发现get_text()的str中有空格，所以指令解析失败
+            # 误打误撞了属于是💧
             message.command = await CommandParser.parse(message.get_text())
-            # TODO:这里有bug，当content有多条内容时解析命令失败了??
-            logger.info(f"OUT!!!!!!!, {message.command}")
 
         return message
