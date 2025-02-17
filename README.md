@@ -45,3 +45,11 @@ python main.py
 
 
 [napcat]: https://github.com/NapNeko/NapCatQQ
+
+
+
+## 计划
+- [x] message_adapter: message适配器，用于处理不同类型的message_event(尚不完善)
+- [x] message_parser: message解析器，将message_event中的content分离出txt, at, image等，然后转换成统一标准的cmd以及适配插件的类型
+- [x] BaseChatPlugin: chat插件基类，完善多轮对话、文件对话等基本功能
+- [x] 数据库部署，主要用户多用户使用聊天插件的多轮对话或者文件对话场景

@@ -79,6 +79,5 @@ class KimiChatPlugin(BaseChatPlugin):
         super().__init__(api_base_url="https://api.moonshot.cn/v1", api_key=config.kimi_api)
 
     @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
-    # @MessageAdapter.register("private", ["text"], "kimi_chat")
     async def chat(self, event: Dict):
         return await super().chat(event)
