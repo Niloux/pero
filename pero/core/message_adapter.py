@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pero.cmd.command_manager import command_manager
-from pero.core.message_parser import message_parser
+from pero.core.message_parser import MessageParser
 from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.logger import logger
 
@@ -28,7 +28,8 @@ class MessageAdapter:
     @classmethod
     async def handle_message(cls, event: Dict[str, Any]) -> List[Union[Tuple[str, Dict], None]]:
         results: List[Union[Tuple[str, Dict], None]] = []
-        message = await message_parser.parse(event)
+        message = await MessageParser.parse(event)
+        logger.info(f"Parsed message: {message}")
 
         # cmd指令
         if message.command:

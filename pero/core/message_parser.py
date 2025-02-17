@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional
 
-from pero.cmd.command_parser import Command, command_parser
-from pero.core.common import At, Image, MessageElement, Text
+from pero.cmd.command_parser import Command, CommandParser
+from pero.core.message import At, Image, MessageElement, Text
+from pero.utils.logger import logger
 
 
 class Message:
@@ -14,6 +15,20 @@ class Message:
         self.types: List[str] = []
         self.command: Optional[Command] = None
 
+    def __str__(self) -> str:
+        content_str = "\n".join([f"{key}: {value.to_dict()}" for key, value in self.content.items()])
+        return (
+            f"Message(\n"
+            f"  sender: {self.sender},\n"
+            f"  source: {self.source},\n"
+            f"  reply: {self.reply},\n"
+            f"  target: {self.target},\n"
+            f"  content: {{\n{content_str}\n  }},\n"
+            f"  types: {self.types},\n"
+            f"  command: {self.command}\n"
+            f")"
+        )
+
     def get_text(self) -> str:
         return self.content.get("text").text
 
@@ -21,7 +36,8 @@ class Message:
 class MessageParser:
     """消息解析器类"""
 
-    async def parse(self, event: Dict[str, Any]) -> Message:
+    @classmethod
+    async def parse(cls, event: Dict[str, Any]) -> Message:
         message = Message()
         """解析消息"""
         # 解析content内容
@@ -44,10 +60,13 @@ class MessageParser:
         message.reply = event.get("reply")
         message.target = event.get("target")
         # 解析指令
-        if "text" in message.content and message.content["text"].text:
-            message.command = await command_parser.parse(message.content["text"].text)
+        logger.info(f"{message}")
+        logger.info(f"{message.types}")
+        logger.info(f"{message.get_text()}")
+        if "text" in message.types and message.get_text():
+            logger.info("GETIN!!!!!!!!!")
+            message.command = await CommandParser.parse(message.get_text())
+            # TODO:这里有bug，当content有多条内容时解析命令失败了??
+            logger.info(f"OUT!!!!!!!, {message.command}")
 
         return message
-
-
-message_parser = MessageParser()

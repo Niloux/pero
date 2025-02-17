@@ -13,11 +13,13 @@ class CommandParser:
         # 修改正则表达式，支持中文字符
         self.command_pattern = re.compile(r"^/([a-zA-Z0-9_\u4e00-\u9fa5]+)(?:\s+(.*))?$")
 
-    async def parse(self, input_str: str) -> Optional[Command]:
+    @classmethod
+    async def parse(cls, input_str: str) -> Optional[Command]:
         """
         解析输入的命令字符串，并返回命令和多个参数（列表形式）
         """
-        match = self.command_pattern.match(input_str)
+        command_pattern = re.compile(r"^/([a-zA-Z0-9_\u4e00-\u9fa5]+)(?:\s+(.*))?$")
+        match = command_pattern.match(input_str)
         if match:
             name = match.group(1)  # 提取命令部分
             argv_str = match.group(2) if match.group(2) else ""  # 提取参数部分
@@ -26,6 +28,3 @@ class CommandParser:
             return Command(name, argv)
         else:
             return None
-
-
-command_parser = CommandParser()
