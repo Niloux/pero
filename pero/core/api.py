@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Union
 
 from pero.core.element import (
     At,
@@ -1319,17 +1319,17 @@ class API:
         params = {"user_id": user_id, "message": message}
         return ("/send_private_msg", params)
 
-    async def post_msg(self, event: Dict, *args, **kwargs):
+    async def post_msg(self, source: str, target: str, *args, **kwargs):
         """
-        :param event: 事件
+        :param source: 事件来源
         :param args: 参数
         :param kwargs: 参数
         :return: 发送消息
         """
-        if event.get("source_type") == "private":
-            return await self.post_private_msg(event["target"], *args, **kwargs)
-        elif event.get("source_type") == "group":
-            return await self.post_group_msg(event["target"], *args, **kwargs)
+        if source == "private":
+            return await self.post_private_msg(user_id=target, *args, **kwargs)
+        elif source == "group":
+            return await self.post_group_msg(group_id=target, *args, **kwargs)
         else:
             raise Exception("Unknown source type")
 

@@ -4,6 +4,7 @@ from openai import OpenAI
 
 from pero.core.api import PERO_API
 from pero.core.message_adapter import MessageAdapter
+from pero.core.message_parser import Message
 from pero.plugin.plugin_manager import PluginBase, plugin, plugin_manager
 from pero.utils.config import config
 from pero.utils.logger import logger
@@ -23,25 +24,26 @@ class BaseChatPlugin(PluginBase):
         self.client = None
         logger.info(f"{self.__class__.__name__} plugin unloaded")
 
-    async def chat(self, event: Dict):
+    async def chat(self, message: Message):
         """处理群消息"""
         try:
             # 获取任务追踪器
             task = plugin_manager.track_task(self.__class__.__name__)
 
             try:
-                logger.info(f"收到消息: {event}")
-                # 提取文本消息
-                text = self._extract_text(event)
-                if not text:
+                logger.info(f"收到消息: {message.content}")
+                if not message.content:
                     return
+
+                # 获取文本内容
+                text = message.content["text"].text
 
                 # 调用API获取回复
                 result = await self._get_chat_response(text)
                 logger.info(f"回复消息: {result}")
 
                 # 发送群消息
-                return await PERO_API.post_msg(event, text=result, reply=event.get("reply"))
+                return await PERO_API.post_msg(message.source, message.target, text=result, reply=message.reply)
             finally:
                 # 标记任务完成
                 plugin_manager.complete_task(task)
@@ -49,13 +51,6 @@ class BaseChatPlugin(PluginBase):
         except Exception as e:
             logger.error(f"Error in {self.__class__.__name__} plugin: {e}")
             raise
-
-    def _extract_text(self, event: Dict) -> str:
-        """从事件中提取文本内容"""
-        for content in event.get("content", []):
-            if content.get("type") == "text":
-                return content.get("data", {}).get("text", "")
-        return ""
 
     async def _get_chat_response(self, text: str) -> str:
         """调用ChatGPT API获取回复"""

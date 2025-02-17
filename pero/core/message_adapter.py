@@ -2,6 +2,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pero.cmd.command_manager import command_manager
+from pero.core.message_parser import message_parser
 from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.logger import logger
 
@@ -26,39 +27,34 @@ class MessageAdapter:
 
     @classmethod
     async def handle_message(cls, event: Dict[str, Any]) -> List[Union[Tuple[str, Dict], None]]:
-        # TODO:需要一个正儿八经的message_parser解析层去解析message内容是cmd还是插件，或者思考一下现在的划分是否合理。
-        source_type: str = event.get("source_type", "")
-        event_types: Any = event.get("message_type", [])
         results: List[Union[Tuple[str, Dict], None]] = []
-
-        if isinstance(event_types, list):
-            event_types = sorted(event_types)
-        else:
-            event_types = [event_types]
-
-        key: Tuple[str] = tuple(event_types)
-        handlers: List[Tuple[str, Callable]] = cls.handlers.get(source_type, {}).get(key, [])
-
-        # 插件消息任务
-        for plugin_name, handler in handlers:
-            plugin_instance: Optional[Any] = plugin_manager.get_plugin(plugin_name)
-            if plugin_instance:
-                try:
-                    result = await handler(plugin_instance, event)
-                    results.append(cls._ensure_valid_result(result))
-                except Exception as e:
-                    logger.error(f"Error handling event with plugin {plugin_name}: {e}")
-            else:
-                logger.error(f"Plugin instance for {plugin_name} not found.")
+        message = await message_parser.parse(event)
 
         # cmd指令
-        try:
-            cmd_results = await asyncio.gather(
-                command_manager.execute(event),
-            )
-            results.extend(cls._ensure_valid_result(result) for result in cmd_results)
-        except Exception as e:
-            logger.error(f"Error executing command manager: {e}")
+        if message.command:
+            try:
+                cmd_results = await asyncio.gather(
+                    command_manager.execute(message),
+                )
+                results.extend(cls._ensure_valid_result(result) for result in cmd_results)
+            except Exception as e:
+                logger.error(f"Error executing command manager: {e}")
+
+        else:
+            # 插件任务
+            key: Tuple[str] = tuple(message.types)
+            handlers: List[Tuple[str, Callable]] = cls.handlers.get(message.source, {}).get(key, [])
+
+            for plugin_name, handler in handlers:
+                plugin_instance: Optional[Any] = plugin_manager.get_plugin(plugin_name)
+                if plugin_instance:
+                    try:
+                        result = await handler(plugin_instance, message)
+                        results.append(cls._ensure_valid_result(result))
+                    except Exception as e:
+                        logger.error(f"Error handling message with plugin {plugin_name}: {e}")
+                else:
+                    logger.error(f"Plugin instance for {plugin_name} not found.")
 
         return results
 

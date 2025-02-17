@@ -69,8 +69,8 @@ class EventParser:
         解析消息事件，根据消息的类型、来源、发送者等信息，转化为统一结构。
         """
         # 基本字段解析
-        source_type = event.get("message_type")  # "private" 或 "group"
-        sender_type = event.get("sub_type")  # "friend" 或 "other"
+        source = event.get("message_type")  # "private" 或 "group"
+        sender = event.get("sub_type")  # "friend" 或 "other"
 
         # 提取消息类型列表
         message_types = [msg.get("type") for msg in event.get("message", []) if msg.get("type")]
@@ -85,8 +85,8 @@ class EventParser:
         # 构建最终统一结构
         return {
             "event": "message",
-            "source_type": source_type,
-            "sender_type": sender_type,
+            "source": source,
+            "sender": sender,
             "message_type": message_types,
             "content": content,
             "target": target,

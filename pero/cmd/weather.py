@@ -27,18 +27,14 @@ class WeatherService:
     async def fetch_json(self, url: str) -> Dict:
         """通用的异步 GET 请求函数，返回 JSON 数据"""
         if not self._session:
-            raise RuntimeError(
-                "Session not initialized. Use 'async with' context manager."
-            )
+            raise RuntimeError("Session not initialized. Use 'async with' context manager.")
         async with self._session.get(url) as response:
             return await response.json()
 
     async def get_location(self, city: str) -> Tuple[Optional[float], Optional[float]]:
         """调用腾讯地图接口，根据城市获取经纬度"""
         city = quote(city)
-        url = (
-            f"https://apis.map.qq.com/ws/geocoder/v1/?address={city}&key={LOCATION_KEY}"
-        )
+        url = f"https://apis.map.qq.com/ws/geocoder/v1/?address={city}&key={LOCATION_KEY}"
 
         data = await self.fetch_json(url)
         if data.get("status") != 0:
@@ -83,7 +79,8 @@ class Forecast(BaseCommand):
     async def execute(self) -> str:
         """处理天气查询命令"""
 
-        location = self.text.strip()
+        # TODO:测试
+        location = self.argv[0]
         if not location:
             return "命令无效，请在命令后添加城市名称。"
 
