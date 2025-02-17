@@ -5,7 +5,7 @@ import logging.handlers
 import sys
 import threading
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
@@ -39,9 +39,7 @@ class LogFormatter(logging.Formatter):
 
         # 格式化异常信息
         if record_copy.exc_info:
-            record_copy.exc_text = "".join(
-                traceback.format_exception(*record_copy.exc_info)
-            )
+            record_copy.exc_text = "".join(traceback.format_exception(*record_copy.exc_info))
 
         if self.json_format:
             log_data = {
@@ -83,23 +81,43 @@ class LogFormatter(logging.Formatter):
 
             log_msg += f"[{record_copy.levelname}] "
             log_msg += f"[{record_copy.name}] "
-            log_msg += (
-                f"[{record_copy.module}.{record_copy.funcName}:{record_copy.lineno}] "
-            )
+            log_msg += f"[{record_copy.module}.{record_copy.funcName}:{record_copy.lineno}] "
             log_msg += f"{record_copy.getMessage()}"
 
             if self.use_color:
                 log_msg += self.COLORS["ENDC"]
 
             if hasattr(record_copy, "extra_data"):
-                log_msg += (
-                    f"\nExtra Data: {json.dumps(record_copy.extra_data, indent=2)}"
-                )
+                log_msg += f"\nExtra Data: {json.dumps(record_copy.extra_data, indent=2)}"
 
             if record_copy.exc_text:
                 log_msg += f"\nException:\n{record_copy.exc_text}"
 
             return log_msg
+
+
+class TimedRotatingFileHandlerWithCleanup(logging.handlers.TimedRotatingFileHandler):
+    """自定义按时间分割并清理旧日志文件的处理器"""
+
+    def __init__(self, *args, **kwargs):
+        self.cleanup_days = kwargs.pop("cleanup_days", 7)
+        super().__init__(*args, **kwargs)
+
+    def doRollover(self):
+        super().doRollover()
+        self.cleanup_old_logs()
+
+    def cleanup_old_logs(self):
+        """清理超过指定天数的日志文件"""
+        now = datetime.now()
+        cutoff = now - timedelta(days=self.cleanup_days)
+
+        log_dir = Path(self.baseFilename).parent
+        for log_file in log_dir.glob(f"{self.baseFilename}*"):
+            if log_file.is_file():
+                timestamp = datetime.fromtimestamp(log_file.stat().st_mtime)
+                if timestamp < cutoff:
+                    log_file.unlink()
 
 
 class EnhancedLogger:
@@ -110,8 +128,9 @@ class EnhancedLogger:
         name: str,
         log_dir: Union[str, Path] = "logs",
         log_level: int = logging.INFO,
-        max_bytes: int = 10 * 1024 * 1024,  # 10MB
-        backup_count: int = 5,
+        when: str = "midnight",
+        interval: int = 1,
+        cleanup_days: int = 7,
         console_output: bool = True,
         use_color: bool = True,
         json_format: bool = False,
@@ -126,37 +145,35 @@ class EnhancedLogger:
 
         # 设置日志文件处理器
         log_file = log_dir / f"{name}.log"
-        file_handler = logging.handlers.RotatingFileHandler(
+        file_handler = TimedRotatingFileHandlerWithCleanup(
             filename=str(log_file),
-            maxBytes=max_bytes,
-            backupCount=backup_count,
+            when=when,
+            interval=interval,
+            backupCount=0,  # 不限制备份数量，由 cleanup_days 控制
             encoding="utf-8",
+            cleanup_days=cleanup_days,
         )
-        file_handler.setFormatter(
-            LogFormatter(use_color=False, json_format=json_format)
-        )
+        file_handler.setFormatter(LogFormatter(use_color=False, json_format=json_format))
         self.logger.addHandler(file_handler)
 
         # 设置控制台输出
         if console_output:
             console_handler = logging.StreamHandler(sys.stdout)
-            console_handler.setFormatter(
-                LogFormatter(use_color=use_color, json_format=json_format)
-            )
+            console_handler.setFormatter(LogFormatter(use_color=use_color, json_format=json_format))
             self.logger.addHandler(console_handler)
 
         # 错误日志单独存储
         error_file = log_dir / f"{name}_error.log"
-        error_handler = logging.handlers.RotatingFileHandler(
+        error_handler = TimedRotatingFileHandlerWithCleanup(
             filename=str(error_file),
-            maxBytes=max_bytes,
-            backupCount=backup_count,
+            when=when,
+            interval=interval,
+            backupCount=0,  # 不限制备份数量，由 cleanup_days 控制
             encoding="utf-8",
+            cleanup_days=cleanup_days,
         )
         error_handler.setLevel(logging.ERROR)
-        error_handler.setFormatter(
-            LogFormatter(use_color=False, json_format=json_format)
-        )
+        error_handler.setFormatter(LogFormatter(use_color=False, json_format=json_format))
         self.logger.addHandler(error_handler)
 
     def _log(
@@ -181,14 +198,10 @@ class EnhancedLogger:
     def warning(self, msg: str, extra_data: Optional[Dict[str, Any]] = None):
         self._log(logging.WARNING, msg, extra_data)
 
-    def error(
-        self, msg: str, extra_data: Optional[Dict[str, Any]] = None, exc_info=True
-    ):
+    def error(self, msg: str, extra_data: Optional[Dict[str, Any]] = None, exc_info=True):
         self._log(logging.ERROR, msg, extra_data, exc_info)
 
-    def critical(
-        self, msg: str, extra_data: Optional[Dict[str, Any]] = None, exc_info=True
-    ):
+    def critical(self, msg: str, extra_data: Optional[Dict[str, Any]] = None, exc_info=True):
         self._log(logging.CRITICAL, msg, extra_data, exc_info)
 
     @staticmethod
