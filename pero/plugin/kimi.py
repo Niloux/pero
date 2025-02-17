@@ -36,7 +36,7 @@ class BaseChatPlugin(PluginBase):
                     return
 
                 # 获取文本内容
-                text = message.content["text"].text
+                text = message.get_text()
 
                 # 调用API获取回复
                 result = await self._get_chat_response(text)

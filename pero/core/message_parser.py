@@ -14,6 +14,9 @@ class Message:
         self.types: List[str] = []
         self.command: Optional[Command] = None
 
+    def get_text(self) -> str:
+        return self.content.get("text").text
+
 
 class MessageParser:
     """消息解析器类"""

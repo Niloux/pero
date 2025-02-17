@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 from typing import Dict, Optional, Tuple
 from urllib.parse import quote
@@ -79,13 +80,14 @@ class Forecast(BaseCommand):
     async def execute(self) -> str:
         """处理天气查询命令"""
 
-        # TODO:测试
-        location = self.argv[0]
-        if not location:
+        # 检查是否提供了城市名称
+        if not self.argv:
             return "命令无效，请在命令后添加城市名称。"
 
         try:
-            return await self.get_forecast(location)
+            # 并发查询所有城市的天气信息
+            results = await asyncio.gather(*[self.get_forecast(city) for city in self.argv])
+            return "\n\n".join(results)
         except Exception as e:
             error_msg = f"获取天气失败: {str(e)}"
             logger.error(error_msg)
@@ -101,10 +103,3 @@ class Forecast(BaseCommand):
                 return f"无法获取城市 {city} 的经纬度信息，请检查输入是否正确。"
 
             return await service.get_weather(lat, lon)
-
-
-# # 支持并发查询多个城市的示例
-# async def get_multiple_forecasts(cities: list[str]) -> list[str]:
-#     async with WeatherService() as service:
-#         tasks = [Forecast("weather", city).get_forecast(city) for city in cities]
-#         return await asyncio.gather(*tasks)
