@@ -1333,5 +1333,15 @@ class API:
         else:
             raise Exception("Unknown source type")
 
+    async def post_message(self, message, *args, **kwargs):
+        """
+        上层封装
+        :param message: 包含source, target, reply等信息的消息对象
+        :param args: 参数
+        :param kwargs: 参数
+        :return: 发送消息
+        """
+        return await self.post_msg(message.source, message.target, reply=message.reply, *args, **kwargs)
+
 
 PERO_API = API()

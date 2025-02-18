@@ -2,7 +2,7 @@ from typing import Dict
 
 from openai import OpenAI
 
-from pero.core.api import PERO_API
+from pero.core.api import PERO_API as pero
 from pero.core.message_adapter import MessageAdapter
 from pero.core.message_parser import Message
 from pero.plugin.plugin_manager import PluginBase, plugin, plugin_manager
@@ -43,7 +43,7 @@ class BaseChatPlugin(PluginBase):
                 logger.info(f"回复消息: {result}")
 
                 # 发送群消息
-                return await PERO_API.post_msg(message.source, message.target, text=result, reply=message.reply)
+                return await pero.post_message(message=message, text=result)
             finally:
                 # 标记任务完成
                 plugin_manager.complete_task(task)
