@@ -11,9 +11,10 @@ from pero.utils.logger import logger
 
 
 class BaseChatPlugin(PluginBase):
-    def __init__(self, api_base_url: str, api_key: str):
-        self.client = OpenAI(api_key=api_key, base_url=api_base_url)
-        self.api_key = api_key
+    def __init__(self, model_name: str):
+        model_config = config.model[model_name]
+        self.client = OpenAI(api_key=model_config["api_key"], base_url=model_config["base_url"])
+        self.system_content = model_config["system_content"]
 
     def on_load(self):
         """插件加载时初始化OpenAI客户端"""
@@ -57,10 +58,7 @@ class BaseChatPlugin(PluginBase):
         completion = self.client.chat.completions.create(
             model="moonshot-v1-8k",
             messages=[
-                {
-                    "role": "system",
-                    "content": "你是 Pero，由 Texasx3d 提供的人工智能助手，你更擅长中文和英文的对话。你是群友的好帮手！你很可爱！非常非常可爱！",
-                },
+                {"role": "system", "content": self.system_content},
                 {"role": "user", "content": text},
             ],
             temperature=0.3,
@@ -68,11 +66,11 @@ class BaseChatPlugin(PluginBase):
         return completion.choices[0].message.content
 
 
-@plugin(name="kimi_chat", version="1.0", dependencies=[])  # 如果有依赖其他插件，在这里添加
+@plugin(name="kimi", version="1.0", dependencies=[])  # 如果有依赖其他插件，在这里添加
 class KimiChatPlugin(BaseChatPlugin):
     def __init__(self):
-        super().__init__(api_base_url="https://api.moonshot.cn/v1", api_key=config.kimi_api)
+        super().__init__(model_name="kimi")
 
-    @MessageAdapter.register("group", ["text", "at"], "kimi_chat")
+    @MessageAdapter.register("group", ["text", "at"], "kimi")
     async def chat(self, event: Dict):
         return await super().chat(event)
