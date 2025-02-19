@@ -10,6 +10,7 @@ from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
 from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.config import config
+from pero.utils.hot_config import hot_config
 from pero.utils.logger import logger
 
 
@@ -25,6 +26,7 @@ class Application:
         self.websocket: Optional[WebSocketClient] = None
         self.exit_stack = AsyncExitStack()
         self.main_task: Optional[asyncio.Task] = None
+        self.hot_config = hot_config
 
     async def initialize(self):
         """初始化应用程序组件"""
@@ -94,6 +96,9 @@ class Application:
 
         # 关闭插件管理器
         await self.plugin_manager.shutdown()
+
+        # 关闭热配置
+        self.hot_config.stop_watcher()
 
         # 关闭其他资源
         await self.exit_stack.aclose()

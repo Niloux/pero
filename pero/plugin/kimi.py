@@ -6,15 +6,21 @@ from pero.core.api import PERO_API as pero
 from pero.core.message_adapter import MessageAdapter
 from pero.core.message_parser import Message
 from pero.plugin.plugin_manager import PluginBase, plugin, plugin_manager
-from pero.utils.config import config
+from pero.utils.hot_config import hot_config
 from pero.utils.logger import logger
 
 
 class BaseChatPlugin(PluginBase):
     def __init__(self, model_name: str):
-        model_config = config.model[model_name]
+        self.config = hot_config
+        self.model_name = model_name
+        self._update_config()
+
+    def _update_config(self):
+        model_config = self.config.get("model", {}).get(self.model_name, {})
         self.client = OpenAI(api_key=model_config["api_key"], base_url=model_config["base_url"])
         self.system_content = model_config["system_content"]
+        self.model = model_config["model"]
 
     def on_load(self):
         """插件加载时初始化OpenAI客户端"""
@@ -55,8 +61,9 @@ class BaseChatPlugin(PluginBase):
 
     async def _get_chat_response(self, text: str) -> str:
         """调用ChatGPT API获取回复"""
+        self._update_config()  # 每次调用API之前更新配置
         completion = self.client.chat.completions.create(
-            model="moonshot-v1-8k",
+            model=self.model,
             messages=[
                 {"role": "system", "content": self.system_content},
                 {"role": "user", "content": text},

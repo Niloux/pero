@@ -184,6 +184,7 @@ System Volume Information/IndexerVolumeGuid
 
 #config文件
 config.yaml
+config.json
 
 #测试用的数据结构文件
 text.py
