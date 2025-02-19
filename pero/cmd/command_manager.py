@@ -1,3 +1,5 @@
+"""弃用"""
+
 import importlib.util
 import os
 from typing import Any, Dict, Tuple

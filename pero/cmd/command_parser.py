@@ -1,3 +1,5 @@
+"""弃用"""
+
 import re
 from typing import List, Optional
 

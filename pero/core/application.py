@@ -3,7 +3,6 @@ import signal
 from contextlib import AsyncExitStack
 from typing import Optional
 
-from pero.cmd.command_manager import command_manager
 from pero.core.event_dispatcher import EventHandler
 from pero.core.event_parser import EventParser
 from pero.core.task_manager import TaskManager
@@ -19,7 +18,6 @@ class Application:
 
     def __init__(self):
         self.plugin_manager = plugin_manager
-        self.command_manager = command_manager
         self.event_adapter = EventHandler()
         self.event_parser = EventParser()
         self.task_manager: Optional[TaskManager] = None
@@ -44,9 +42,6 @@ class Application:
 
         # 加载插件
         await self._load_plugins()
-
-        # 加载命令
-        await self._load_commands()
 
         logger.info("Application initialized successfully")
 
@@ -74,16 +69,6 @@ class Application:
             logger.info(f"Plugins loaded from {plugin_dir}")
         except Exception as e:
             logger.error(f"Failed to load plugins: {e}")
-            raise
-
-    async def _load_commands(self):
-        """加载命令"""
-        try:
-            cmd_dir = config.get("cmd_dir", "pero/cmd")
-            self.command_manager.load_commands(cmd_dir)
-            logger.info(f"Commands loaded from {cmd_dir}")
-        except Exception as e:
-            logger.error(f"Failed to load commands: {e}")
             raise
 
     async def _shutdown(self):

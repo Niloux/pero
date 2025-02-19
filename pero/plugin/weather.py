@@ -1,5 +1,3 @@
-"""弃用"""
-
 import asyncio
 import traceback
 from typing import Dict, Optional, Tuple
@@ -7,7 +5,10 @@ from urllib.parse import quote
 
 import aiohttp
 
-from pero.cmd.commands import BaseCommand
+from pero.core.message_adapter import MessageAdapter
+from pero.core.message_parser import Message
+from pero.plugin.plugin_base import CommandBase
+from pero.plugin.plugin_manager import plugin
 from pero.utils.config import config
 from pero.utils.logger import logger
 
@@ -76,19 +77,23 @@ class WeatherService:
         )
 
 
-class Forecast(BaseCommand):
-    command_name = "weather"
+@plugin(name="weather", version="1.0", dependencies=[])
+class Forecast(CommandBase):
+    @MessageAdapter.register("group", ["cmd", "weather"], "weather")
+    async def execute(self, message: Message) -> str:
+        results = await self.search(message=message)
+        return await super().execute(message, results)
 
-    async def execute(self) -> str:
+    async def search(self, message: Message) -> str:
         """处理天气查询命令"""
 
         # 检查是否提供了城市名称
-        if not self.argv:
+        if not message.command.argv:
             return "命令无效，请在命令后添加城市名称。"
 
         try:
             # 并发查询所有城市的天气信息
-            results = await asyncio.gather(*[self.get_forecast(city) for city in self.argv])
+            results = await asyncio.gather(*[self.get_forecast(city) for city in message.command.argv])
             return "\n\n".join(results)
         except Exception as e:
             error_msg = f"获取天气失败: {str(e)}"

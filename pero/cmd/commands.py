@@ -1,3 +1,5 @@
+"""弃用"""
+
 from pero.cmd.command_base import BaseCommand
 
 

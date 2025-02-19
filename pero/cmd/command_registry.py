@@ -1,3 +1,5 @@
+"""弃用"""
+
 from pero.cmd.command_manager import command_manager
 from pero.utils.logger import logger
 

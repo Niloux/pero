@@ -1,7 +1,5 @@
-import asyncio
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from pero.cmd.command_manager import command_manager
 from pero.core.message_parser import MessageParser
 from pero.plugin.plugin_manager import plugin_manager
 from pero.utils.logger import logger
@@ -33,32 +31,22 @@ class MessageAdapter:
 
         # cmd指令
         if message.command:
-            logger.info("Handling command...")
-            try:
-                cmd_results = await asyncio.gather(
-                    command_manager.execute(message),
-                )
-                results.extend(cls._ensure_valid_result(result) for result in cmd_results)
-            except Exception as e:
-                logger.error(f"Error executing command manager: {e}")
+            message.types = ["cmd", message.command.name]
 
-        else:
-            logger.info("No command found, handling with plugins...")
+        # 插件任务
+        key: Tuple[str] = tuple(message.types)
+        handlers: List[Tuple[str, Callable]] = cls.handlers.get(message.source, {}).get(key, [])
 
-            # 插件任务
-            key: Tuple[str] = tuple(message.types)
-            handlers: List[Tuple[str, Callable]] = cls.handlers.get(message.source, {}).get(key, [])
-
-            for plugin_name, handler in handlers:
-                plugin_instance: Optional[Any] = plugin_manager.get_plugin(plugin_name)
-                if plugin_instance:
-                    try:
-                        result = await handler(plugin_instance, message)
-                        results.append(cls._ensure_valid_result(result))
-                    except Exception as e:
-                        logger.error(f"Error handling message with plugin {plugin_name}: {e}")
-                else:
-                    logger.error(f"Plugin instance for {plugin_name} not found.")
+        for plugin_name, handler in handlers:
+            plugin_instance: Optional[Any] = plugin_manager.get_plugin(plugin_name)
+            if plugin_instance:
+                try:
+                    result = await handler(plugin_instance, message)
+                    results.append(cls._ensure_valid_result(result))
+                except Exception as e:
+                    logger.error(f"Error handling message with plugin {plugin_name}: {e}")
+            else:
+                logger.error(f"Plugin instance for {plugin_name} not found.")
 
         return results
 

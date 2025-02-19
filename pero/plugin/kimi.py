@@ -1,5 +1,3 @@
-from typing import Dict
-
 from openai import OpenAI
 
 from pero.core.api import PERO_API as pero
@@ -79,5 +77,5 @@ class KimiChatPlugin(BaseChatPlugin):
         super().__init__(model_name="kimi")
 
     @MessageAdapter.register("group", ["text", "at"], "kimi")
-    async def chat(self, event: Dict):
-        return await super().chat(event)
+    async def chat(self, message: Message):
+        return await super().chat(message)
