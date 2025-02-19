@@ -16,6 +16,7 @@ class Message:
 
     def __str__(self) -> str:
         content_str = "\n".join([f"{key}: {value.to_dict()}" for key, value in self.content.items()])
+        command_str = f"{self.command.name} {self.command.argv}" if self.command else ""
         return (
             f"Message(\n"
             f"  sender: {self.sender},\n"
@@ -24,7 +25,7 @@ class Message:
             f"  target: {self.target},\n"
             f"  content: {{\n{content_str}\n  }},\n"
             f"  types: {self.types},\n"
-            f"  command: {self.command.name} {self.command.argv}\n"
+            f"  command: {command_str}\n"
             f")"
         )
 
