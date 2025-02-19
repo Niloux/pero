@@ -24,7 +24,7 @@ class Message:
             f"  target: {self.target},\n"
             f"  content: {{\n{content_str}\n  }},\n"
             f"  types: {self.types},\n"
-            f"  command: {self.command}\n"
+            f"  command: {self.command.name} {self.command.argv}\n"
             f")"
         )
 
