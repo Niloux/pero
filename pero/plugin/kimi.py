@@ -1,9 +1,10 @@
 from openai import OpenAI
 
 from pero.core.api import PERO_API as pero
-from pero.core.message_adapter import MessageAdapter
+from pero.core.message_adapter import register
 from pero.core.message_parser import Message
-from pero.plugin.plugin_manager import PluginBase, plugin, plugin_manager
+from pero.plugin.plugin_base import PluginBase
+from pero.plugin.plugin_manager import plugin, plugin_manager
 from pero.utils.hot_config import hot_config
 from pero.utils.logger import logger
 
@@ -76,6 +77,6 @@ class KimiChatPlugin(BaseChatPlugin):
     def __init__(self):
         super().__init__(model_name="kimi")
 
-    @MessageAdapter.register("group", ["text", "at"], "kimi")
+    @register("group", ["text", "at"], "kimi")
     async def chat(self, message: Message):
         return await super().chat(message)

@@ -5,7 +5,7 @@ from urllib.parse import quote
 
 import aiohttp
 
-from pero.core.message_adapter import MessageAdapter
+from pero.core.message_adapter import register
 from pero.core.message_parser import Message
 from pero.plugin.plugin_base import CommandBase
 from pero.plugin.plugin_manager import plugin
@@ -79,7 +79,7 @@ class WeatherService:
 
 @plugin(name="weather", version="1.0", dependencies=[])
 class Forecast(CommandBase):
-    @MessageAdapter.register("group", ["cmd", "weather"], "weather")
+    @register("group", ["cmd", "weather"], "weather")
     async def execute(self, message: Message) -> str:
         results = await self.search(message=message)
         return await super().execute(message, results)

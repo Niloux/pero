@@ -49,7 +49,7 @@ class Application:
         """加载配置文件"""
         try:
             # 这里可以添加配置验证逻辑
-            required_configs = ["ws_uri", "plugin_dir", "cmd_dir"]
+            required_configs = ["ws_uri", "plugin_dir"]
             for key in required_configs:
                 if not config.get(key):
                     raise ValueError(f"Missing required config: {key}")

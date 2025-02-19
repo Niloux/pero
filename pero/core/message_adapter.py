@@ -64,3 +64,11 @@ class MessageAdapter:
             return result
         logger.warning(f"Unexpected result type: {type(result)}. Expected (str, dict) or None.")
         return None
+
+
+def register(scope: str, commands: list, plugin_name: str):
+    def decorator(func):
+        MessageAdapter.register(scope, commands, plugin_name)(func)
+        return func
+
+    return decorator
