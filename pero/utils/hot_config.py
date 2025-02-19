@@ -50,4 +50,4 @@ class HotConfig:
         self._watcher_thread.join()
 
 
-hot_config = HotConfig("pero/plugin/config.json")
+hot_config = HotConfig("config.json")
