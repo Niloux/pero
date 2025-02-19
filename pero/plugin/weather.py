@@ -9,7 +9,7 @@ from pero.core.message_adapter import register
 from pero.core.message_parser import Message
 from pero.plugin.plugin_base import CommandBase
 from pero.plugin.plugin_manager import plugin
-from pero.utils.config import config
+from pero.utils.config import config_manager as config
 from pero.utils.logger import logger
 
 WEATHER_KEY = config.WEATHER_KEY

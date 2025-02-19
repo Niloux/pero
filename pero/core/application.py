@@ -8,8 +8,7 @@ from pero.core.event_parser import EventParser
 from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
 from pero.plugin.plugin_manager import plugin_manager
-from pero.utils.config import config
-from pero.utils.hot_config import hot_config
+from pero.utils.config import config_manager
 from pero.utils.logger import logger
 
 
@@ -24,7 +23,7 @@ class Application:
         self.websocket: Optional[WebSocketClient] = None
         self.exit_stack = AsyncExitStack()
         self.main_task: Optional[asyncio.Task] = None
-        self.hot_config = hot_config
+        self.config = config_manager
 
     async def initialize(self):
         """初始化应用程序组件"""
@@ -34,7 +33,7 @@ class Application:
         await self._load_config()
 
         # 初始化WebSocket客户端
-        uri = config.get("ws_uri")
+        uri = self.config.get("ws_uri")
         self.websocket = await self.exit_stack.enter_async_context(WebSocketClient(uri))
 
         # 初始化任务管理器
@@ -51,7 +50,7 @@ class Application:
             # 这里可以添加配置验证逻辑
             required_configs = ["ws_uri", "plugin_dir"]
             for key in required_configs:
-                if not config.get(key):
+                if not self.config.get(key):
                     raise ValueError(f"Missing required config: {key}")
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
@@ -60,7 +59,7 @@ class Application:
     async def _load_plugins(self):
         """加载插件"""
         try:
-            plugin_dir = config.get("plugin_dir", "plugins")
+            plugin_dir = self.config.get("plugin_dir", "plugins")
             self.plugin_manager.add_plugin_dir(plugin_dir)
             self.plugin_manager.discover_plugins()
             self.plugin_manager.load_plugins()
@@ -83,7 +82,7 @@ class Application:
         await self.plugin_manager.shutdown()
 
         # 关闭热配置
-        self.hot_config.stop_watcher()
+        self.config.stop_watcher()
 
         # 关闭其他资源
         await self.exit_stack.aclose()

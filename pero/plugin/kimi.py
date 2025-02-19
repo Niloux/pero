@@ -5,13 +5,13 @@ from pero.core.message_adapter import register
 from pero.core.message_parser import Message
 from pero.plugin.plugin_base import PluginBase
 from pero.plugin.plugin_manager import plugin, plugin_manager
-from pero.utils.hot_config import hot_config
+from pero.utils.config import config_manager
 from pero.utils.logger import logger
 
 
 class BaseChatPlugin(PluginBase):
     def __init__(self, model_name: str):
-        self.config = hot_config
+        self.config = config_manager
         self.model_name = model_name
         self._update_config()
 
