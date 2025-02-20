@@ -1,7 +1,11 @@
+"""消息类型"""
+
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 
+@dataclass
 class MessageElement(ABC):
     """消息元素的基类"""
 
@@ -19,13 +23,12 @@ class MessageElement(ABC):
         pass
 
 
+@dataclass
 class Text(MessageElement):
     """文本消息元素"""
 
-    type = "text"
-
-    def __init__(self, text: str):
-        self.text = text
+    text: str
+    type: str = "text"
 
     def to_dict(self) -> Dict[str, Any]:
         return {"type": self.type, "data": {"text": self.text}}
@@ -35,13 +38,12 @@ class Text(MessageElement):
         return cls(data.get("data", {}).get("text", ""))
 
 
+@dataclass
 class At(MessageElement):
     """@ 消息元素"""
 
-    type = "at"
-
-    def __init__(self, qq: str):
-        self.qq = qq
+    qq: str
+    type: str = "at"
 
     def to_dict(self) -> Dict[str, Any]:
         return {"type": self.type, "data": {"qq": self.qq}}
@@ -51,14 +53,13 @@ class At(MessageElement):
         return cls(data.get("data", {}).get("qq", ""))
 
 
+@dataclass
 class Image(MessageElement):
     """图片消息元素"""
 
-    type = "image"
-
-    def __init__(self, url: str, file_id: Optional[str] = None):
-        self.url = url
-        self.file_id = file_id
+    url: str
+    file_id: Optional[str] = None
+    type: str = "image"
 
     def to_dict(self) -> Dict[str, Any]:
         return {"type": self.type, "data": {"url": self.url, "file_id": self.file_id}}

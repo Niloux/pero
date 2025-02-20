@@ -1,7 +1,7 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from pero.core.message import At, Image, MessageElement, Text
+from pero.core.message_types import At, Image, MessageElement, Text
 
 
 class Message:

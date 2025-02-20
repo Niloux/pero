@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pero.core.event import EventHandler, EventParser
+from pero.core.event_bak import EventHandler, EventParser
 from pero.utils.logger import logger
 from pero.utils.queue import post_queue, recv_queue
 

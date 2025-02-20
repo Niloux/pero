@@ -3,7 +3,7 @@ import signal
 from contextlib import AsyncExitStack
 from typing import Optional
 
-from pero.core.event import EventHandler, EventParser
+from pero.core.event_bak import EventHandler, EventParser
 from pero.core.task_manager import TaskManager
 from pero.core.websocket import WebSocketClient
 from pero.plugin.plugin_manager import plugin_manager
