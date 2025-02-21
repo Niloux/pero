@@ -5,9 +5,10 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pero.core.event_bak import EventHandler, EventParser
+from pero.core.adapter import Adapter
+from pero.core.event import EventParser
 from pero.utils.logger import logger
-from pero.utils.queue import post_queue, recv_queue
+from pero.utils.queue import recv_queue
 
 
 class TaskPriority(Enum):
@@ -30,12 +31,12 @@ class TaskInfo:
 class TaskManager:
     def __init__(
         self,
-        dispatch: EventHandler,
+        adapter: Adapter,
         parser: EventParser,
         max_concurrent_tasks: int = 100,
         default_timeout: float = 60.0,
     ):
-        self.dispatch = dispatch
+        self.adapter = adapter
         self.parser = parser
         self.max_concurrent_tasks = max_concurrent_tasks
         self.default_timeout = default_timeout
@@ -64,7 +65,7 @@ class TaskManager:
             await self.task_semaphore.acquire()
 
             priority = self._determine_priority(event)
-            task = asyncio.create_task(self._handle_event_with_timeout(event))
+            task = asyncio.create_task(self._publish_with_timeout(event))
             task_info = TaskInfo(
                 task=task,
                 priority=priority,
@@ -79,35 +80,29 @@ class TaskManager:
     def _determine_priority(self, event: Dict[str, Any]) -> TaskPriority:
         return TaskPriority[event.get("priority", "NORMAL").upper()]
 
-    async def _handle_event_with_timeout(self, event: Dict[str, Any]):
+    async def _publish_with_timeout(self, event: Dict[str, Any]):
         start_time = time.time()
         task_info = self.running_tasks[asyncio.current_task()]
 
         try:
-            return await asyncio.wait_for(self.handle_event(event), timeout=task_info.timeout)
+            return await asyncio.wait_for(self.publish(event), timeout=task_info.timeout)
         except asyncio.TimeoutError:
             if task_info.retries < task_info.max_retries:
                 task_info.retries += 1
                 logger.warning(f"Task timeout, retrying ({task_info.retries}/{task_info.max_retries})")
-                return await self._handle_event_with_timeout(event)
+                return await self._publish_with_timeout(event)
             else:
                 raise
         finally:
             self._update_metrics(time.time() - start_time)
 
-    async def handle_event(self, event: Dict[str, Any]):
+    async def publish(self, event: Dict[str, Any]):
         try:
-            parsed_event = await self.parser.parse_event(event)
-            if parsed_event:
-                logger.debug(f"Parsed event: {parsed_event}")
-                results = await self.dispatch.handle_event(parsed_event)
+            parsed_msg = await self.parser.parse(event)
+            if parsed_msg:
+                logger.debug(f"{parsed_msg=}")
+                await self.adapter.run(parsed_msg)
 
-                for result in results:
-                    if result:
-                        await post_queue.put(result)
-                        logger.debug(f"Posted result to queue: {result}")
-
-                return results
         except Exception as e:
             logger.error(f"Error handling event: {e}")
             raise

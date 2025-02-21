@@ -51,11 +51,11 @@ class EventParser:
         _message.target = msg.get("user_id") if _message.type == "private" else msg.get("group_id")
 
         # 解析命令
-        text_parts = _message.get_text()
-        commands = await CommandParser.parse(text_parts)
-        _message.commands.extend(filter(None, commands))
+        text = _message.get_text()
+        command = await CommandParser.parse(text)
+        _message.command = command
 
-        if _message.commands:
+        if _message.command:
             _message.has_cmd = True
 
         return _message

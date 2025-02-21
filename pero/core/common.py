@@ -43,11 +43,14 @@ class _Message:
     id: int  # 该条message的唯一标识
     target: int  # 消息接收者
     has_cmd: bool = False  # 是否包含命令
-    commands: List[Tuple[str, List[str]]]  # 命令和命令参数
+    command: Tuple[str, List[str]]  # 命令和命令参数
 
-    def get_text(self) -> List[str]:
+    def get_text(self) -> str:
         """获取消息内容中的Text部分"""
-        return [item.text for item in self.content if isinstance(item, Text)]
+        for i in self.content:
+            if isinstance(i, Text):
+                return i.text
+        return ""
 
 
 @dataclass
